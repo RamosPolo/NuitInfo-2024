@@ -19,7 +19,7 @@ const resUsers = ref([]);
 
 const fetchUsers = async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:3000/api/users');
+    const response = await axios.get('http://54.38.1.169:3000/api/users');
     resUsers.value = response.data.data;
   } catch (error) {
     console.error("Erreur de requête:", error);
