@@ -510,8 +510,6 @@ const series = ref([{
   font-family: 'Press Start 2P', cursive;
 }
   main{
-    //background-image: url("../../assets/credits_pixel_art.png");
-    //filter: blur(100px);
     position: relative;
     z-index: -1;
     width: 99vw;
