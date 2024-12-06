@@ -1,9 +1,18 @@
+<script>
+// N'oubliez pas d'importer ApexCharts
+import ApexCharts from 'vue3-apexcharts';
+export default {
+  components: {
+    apexchart: ApexCharts,
+  },
+};
+</script>
+
 <script setup>
 // Importation d'AOS
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+  import { ref, onMounted, onBeforeUnmount } from 'vue'
   import AOS from 'aos';
   import 'aos/dist/aos.css';
-  import axios from "axios"
 
   const pageContainer = ref(null);
 
@@ -38,7 +47,7 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
       "data": [
         {
           "login": "Oziphos",
-          "id": 106010906,
+          "id": 104010906,
           "node_id": "U_kgDOBlGZGg",
           "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
           "gravatar_id": "",
@@ -67,7 +76,7 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
         },
         {
           "login": "Oziphos",
-          "id": 106010906,
+          "id": 106020906,
           "node_id": "U_kgDOBlGZGg",
           "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
           "gravatar_id": "",
@@ -96,7 +105,7 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
         },
         {
           "login": "Oziphos",
-          "id": 106010906,
+          "id": 106010976,
           "node_id": "U_kgDOBlGZGg",
           "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
           "gravatar_id": "",
@@ -125,7 +134,7 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
         },
         {
           "login": "Oziphos",
-          "id": 106010906,
+          "id": 106010406,
           "node_id": "U_kgDOBlGZGg",
           "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
           "gravatar_id": "",
@@ -154,7 +163,7 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
         },
         {
           "login": "Oziphos",
-          "id": 106010906,
+          "id": 106010806,
           "node_id": "U_kgDOBlGZGg",
           "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
           "gravatar_id": "",
@@ -186,7 +195,7 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
   const resContributors = ref([
     {
       "login": "Oziphos",
-      "id": 106010906,
+      "id": 106010907,
       "node_id": "U_kgDOBlGZGg",
       "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
       "gravatar_id": "",
@@ -374,13 +383,13 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
   // )
 
 // console.log(resCommits.value.data[0].commit.author.name)
-//   function listOfUsers(resUsers){
-//     let users = []
-//     for (let user of resUsers){
-//       users.push(user.login)
-//     }
-//     return users
-//   }
+  function listOfUsers(resUsers){
+    let users = []
+    for (let user of resUsers){
+      users.push(user.login)
+    }
+    return users
+  }
 //
 //   const users = listOfUsers(resUsers.value.data)
 //   function nbCommitsByUsers(users,resCommits){
@@ -399,24 +408,82 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 //   }
 //   const nb = nbCommitsByUsers(users, resCommits.value.data)
 //   console.log(nb)
+console.log(listOfUsers(resUsers.value.data))
+const chartOptions = {
+  chart: {
+    type: 'bar',
+    height: 350,
+  },
+  xaxis: {
+    categories: listOfUsers(resUsers.value.data),
+    labels: {
+      style: {
+        colors: '#FFFFFF',  // Couleur des labels de l'axe Y
+        fontSize: '14px',    // Taille de la police des labels Y
+        fontWeight: 'bold',  // Poids de la police des labels Y
+      },
+    },// Utiliser les logins des utilisateurs pour les catégories
+  },
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      columnWidth: '55%',
+      borderRadius: 5,
+    },
+  },
+  dataLabels: {
+    enabled: false
+  },
+  yaxis: {
+    title: {
+      text: 'Number of commits',
+    },
+    labels: {
+      style: {
+        colors: '#FFFFFF',  // Couleur des labels de l'axe Y
+        fontSize: '14px',    // Taille de la police des labels Y
+        fontWeight: 'bold',  // Poids de la police des labels Y
+      },
+    },// Utiliser les logins des utilisateurs pour les catégories
+  },
+  fill: {
+    opacity: 1,
+  },
+  tooltip: {
+    y: {
+      formatter: function (val) {
+        return val + " commits";
+      },
+    }
+  }}
+
+// Séries de données qui sont calculées une seule fois pour tous les utilisateurs
+const series = ref([{
+  name: 'Commits',
+  data: [2,2,8,2,2], // Chaque utilisateur a son propre nombre de commits
+}]);
+
 </script>
 
 <template>
+
   <main>
-<!--    <div class="user"  v-for="user in resUsers.data" :key="user.id" data-aos="flip-up">-->
-<!--      <img :src="user.avatar_url " class="avatar" />-->
-<!--      <h2>{{ user.login }}</h2>-->
-<!--      <h3>{{ user.role_name }}</h3>-->
-<!--    </div>-->
-    <div class="card" v-for="user in resUsers.data" :key="user.id" data-aos="flip-left">
-      <div class="imge"  :src="user.avatar_url">
-<!--        <div class="Usericon"></div>-->
-        <img :src="user.avatar_url " class="Usericon" />
+    <h1>Crédits</h1>
+    <div class="card" v-for="(user) in resUsers.data" :key="user.id" data-aos="flip-left">
+      <div class="imge" :src="user.avatar_url">
+        <img :src="user.avatar_url" class="Usericon" />
         <p class="UserName">{{ user.login }}</p>
         <p class="Id">{{ user.role_name }}</p>
       </div>
 
-      <div class="Description"></div>
+      <div class="Description">
+        <apexchart
+          type="bar"
+          :options="chartOptions"
+        :series="series"
+        height="350"
+        />
+      </div>
     </div>
   </main>
 
@@ -424,21 +491,49 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+* {
+  font-family: 'Press Start 2P', cursive;
+}
   main{
+    //background-image: url("../../assets/credits_pixel_art.png");
+    //filter: blur(100px);
+    position: relative;
+    z-index: -1;
     width: 99vw;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    scroll-behavior: smooth;
   }
-  /*.user{
-    margin-top: 8rem;
-    margin-bottom: 8rem;
-  }*/
+
+h1 {
+  font-size: 200px;
+  text-align: center;
+  background: linear-gradient(131deg, rgba(132,0,243,1) 19%, rgba(255,220,0,1) 86%);
+  -webkit-background-clip: text; /* Nécessaire pour Safari */
+  background-clip: text; /* Pour les autres navigateurs modernes */
+  color: transparent; /* Rend le texte transparent pour afficher le fond du dégradé */
+  margin: 10rem;
+}
+  /* Appliquer l'image de fond floutée */
+  main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("../../assets/credits_pixel_art.png");
+    background-size: cover;
+    filter: blur(100px); /* Applique le flou uniquement à l'image de fond */
+    z-index: -1; /* Met l'image en dessous du contenu principal */
+  }
 
   .card {
-    width: 190px;
-    height: 254px;
+    width: 390px;
+    height: 470px;
     background: rgb(38, 38, 38);
     box-shadow: 7px 5px 10px rgba(0, 0, 0, 0.333);
     margin-top: 8rem;
@@ -446,27 +541,25 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
   }
 
   .imge {
-    height: 70px;
+    height: 120px;
     background-color: #ff5858;
   }
 
   .imge .Usericon {
     transform: translateX(10px) translateY(10px);
-    width: 50px;
-    height: 50px;
+    width: 100px;
+    height: 100px;
     border-radius: 10px;
   }
 
   .imge .UserName {
-    width: 60px;
-    height: 15px;
     border-width: 10px;
     border-radius: 5px;
     border-color: #262626;
     color: #262626;
-    font-size: 15px;
+    font-size: 35px;
     font-weight: bold;
-    transform: translateX(70px) translateY(-45px);
+    transform: translateX(120px) translateY(-100px);
   }
 
   .imge .Id {
@@ -476,17 +569,17 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
     border-radius: 5px;
     border-color: #262626;
     color: #262626;
-    font-size: 15px;
+    font-size: 25px;
     font-weight: bold;
-    transform: translateX(70px) translateY(-35px);
+    transform: translateX(122px) translateY(-100px);
   }
 
   .Description {
     border-color: #141414;
     background-color: #414141;
     transform: translate(5px, 6px);
-    width: 180px;
-    height: 172px;
+    width: 380px;
+    height: 340px;
     border-radius: 5px;
   }
 

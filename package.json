@@ -17,7 +17,8 @@
     "phaser": "^3.87.0",
     "pinia": "^2.2.6",
     "vue": "^3.5.13",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "vue3-apexcharts": "^1.8.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
