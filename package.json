@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "aos": "^2.3.4",
+    "apexcharts": "^4.1.0",
     "axios": "^1.7.9",
     "phaser": "^3.87.0",
     "pinia": "^2.2.6",
