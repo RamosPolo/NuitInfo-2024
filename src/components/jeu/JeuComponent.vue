@@ -1,6 +1,5 @@
 <template>
   <div id="jeu-eau">
-    <h1>Jeu </h1>
     <div id="jeu"></div>
   </div>
 </template>
@@ -210,15 +209,139 @@ function handleDiagonalMovement(keys) {
     }
 }
 
+let progressBar;
+let progress = 0;
+let currentCourant = null;
+
 // Gère les collisions
 function handleCollisions() {
     this.physics.overlap(player, dechetGroup, (player, dechet) => {
-        dechet.destroy();
+        if (!currentCourant) {
+            showDechetInteractionBar.call(this, dechet); // Affiche une barre d'interaction
+        }
     });
 
     this.physics.overlap(player, courantGroup, (player, courant) => {
-      courant.destroy();
+        if (!currentCourant) {
+            currentCourant = courant;
+            showProgressBar.call(this);
+            this.input.keyboard.on('keydown-SPACE', handleSpacePress, this);
+        }
     });
+}
+
+// Affiche la barre de progression
+function showProgressBar() {
+    progressBar = this.add.graphics();
+    updateProgressBar.call(this);
+}
+
+// Met à jour la barre de progression
+function updateProgressBar() {
+    const barWidth = 200; // Largeur de la barre de progression
+    const barHeight = 20; // Hauteur de la barre de progression
+    const x = player.x - barWidth / 2;
+    const y = player.y - 100;
+
+    progressBar.clear();
+    progressBar.fillStyle(0x808080, 1); // Couleur grise pour la barre de progression
+    progressBar.fillRect(x, y, barWidth, barHeight); // Dessine la barre de progression grise
+    progressBar.fillStyle(0x00ff00, 1); // Couleur verte pour la progression
+    progressBar.fillRect(x, y, (progress / 100) * barWidth, barHeight); // Remplit la barre de progression
+}
+
+// Gère les pressions sur la touche espace
+function handleSpacePress() {
+    if (currentCourant) {
+        progress += 10; // Ajustez la valeur selon vos besoins
+        updateProgressBar.call(this);
+
+        if (progress >= 100) {
+            currentCourant.destroy();
+            progressBar.destroy();
+            progress = 0;
+            currentCourant = null;
+            this.input.keyboard.off('keydown-SPACE', handleSpacePress, this);
+        }
+    }
+}
+
+let interactionBar, interactionZoneGreen, interactionZoneRed, movingBar;
+let movingBarDirection = 1;
+let interactionBarTimer;
+let isInteracting = false;
+
+// Affiche une barre d'interaction lorsqu'un déchet est détecté
+function showDechetInteractionBar(dechet) {
+    if (isInteracting) return;
+
+    isInteracting = true;
+
+    const barWidth = 200;
+    const barHeight = 20;
+    const greenZoneWidth = 50; // Largeur de la zone verte
+    const redZoneWidth = barWidth - greenZoneWidth; // Largeur de la zone rouge
+    const x = player.x - barWidth / 2;
+    const y = player.y - 100;
+
+    interactionBar = this.add.graphics();
+    interactionBar.fillStyle(0x000000, 1); // Couleur noire pour le cadre
+    interactionBar.fillRect(x - 2, y - 2, barWidth + 4, barHeight + 4); // Cadre noir
+
+    // Zone verte
+    interactionZoneGreen = this.add.graphics();
+    interactionZoneGreen.fillStyle(0x00ff00, 1);
+    interactionZoneGreen.fillRect(x, y, greenZoneWidth, barHeight);
+
+    // Zone rouge
+    interactionZoneRed = this.add.graphics();
+    interactionZoneRed.fillStyle(0xff0000, 1);
+    interactionZoneRed.fillRect(x + greenZoneWidth, y, redZoneWidth, barHeight);
+
+    // Barre noire mobile
+    movingBar = this.add.graphics();
+    movingBar.fillStyle(0x000000, 1);
+    let movingBarX = x; // Position initiale de la barre noire
+    movingBar.fillRect(movingBarX, y, 10, barHeight);
+
+    // Animation de la barre noire
+    interactionBarTimer = this.time.addEvent({
+        delay: 16, // 60 FPS
+        loop: true,
+        callback: () => {
+            movingBarX += movingBarDirection * 4; // Vitesse de déplacement
+            if (movingBarX <= x || movingBarX >= x + barWidth - 10) {
+                movingBarDirection *= -1; // Inverse la direction
+            }
+            movingBar.clear();
+            movingBar.fillRect(movingBarX, y, 10, barHeight);
+        }
+    });
+
+    // Gestion de la touche espace
+    this.input.keyboard.once('keydown-SPACE', () => {
+        checkBarPosition.call(this, movingBarX, x, greenZoneWidth, dechet);
+    });
+}
+
+// Vérifie si la barre noire est dans la zone verte
+function checkBarPosition(movingBarX, barStartX, greenZoneWidth, dechet) {
+    const greenStart = barStartX;
+    const greenEnd = barStartX + greenZoneWidth;
+
+    if (movingBarX >= greenStart && movingBarX <= greenEnd) {
+        // La barre noire est dans la zone verte
+        dechet.destroy(); // Supprime le déchet
+    }
+
+    // Supprime les graphiques de la barre
+    interactionBar.destroy();
+    interactionZoneGreen.destroy();
+    interactionZoneRed.destroy();
+    movingBar.destroy();
+
+    interactionBarTimer.remove(false); // Arrête le timer
+    isInteracting = false;
 }
 
 // Joue les animations du joueur
@@ -229,7 +352,7 @@ function playAnimations() {
     } else {
         player.anims.stop();
     }
-    
+
     courantGroup.getChildren().forEach(courant => {
         courant.anims.play('courant', true);
     });
@@ -252,8 +375,8 @@ function spawncourants(numberOfdechets) {
     for (let i = 0; i < numberOfdechets; i++) {
         let { x, y } = generateRandomPosition(allEntities, border_width, border_height);
         let courant = courantGroup.create(x, y, 'courant');
-        courant.setScale(0.5);
-        courant.setCircle(50, courant.width / 2 - 50, courant.height / 2 - 50);
+        courant.setScale(0.8);
+        courant.body.setSize(courant.width, courant.height * 0.6); 
         courant.setDepth(0);
         allEntities.push(courant);
     }
@@ -277,7 +400,7 @@ function generateRandomPosition(existingEntities, borderWidth, borderHeight) {
 function movedechets() {
     dechetGroup.getChildren().forEach(dechet => {
         const direction = Phaser.Math.Between(0, 3);
-        const speed = 120;
+        const speed = 60;
 
         switch (direction) {
             case 0:
