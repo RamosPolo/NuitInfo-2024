@@ -13,7 +13,21 @@ export default {
   import { ref, onMounted, onBeforeUnmount } from 'vue'
   import AOS from 'aos';
   import 'aos/dist/aos.css';
+  import axios from 'axios'
 
+const resUsers = ref([]);
+
+const fetchUsers = async () => {
+  try {
+    const response = await axios.get('http://127.0.0.1:3000/api/users');
+    resUsers.value = response.data;
+  } catch (error) {
+    console.error("Erreur de requête:", error);
+  }
+};
+
+// Appel de la fonction pour récupérer les utilisateurs
+fetchUsers();
   const pageContainer = ref(null);
 
   // Initialisation d'AOS lors du montage du composant
@@ -42,156 +56,156 @@ export default {
 
 
 
-  const resUsers = ref({
-      "success": true,
-      "data": [
-        {
-          "login": "Oziphos",
-          "id": 104010906,
-          "node_id": "U_kgDOBlGZGg",
-          "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
-          "gravatar_id": "",
-          "url": "https://api.github.com/users/Oziphos",
-          "html_url": "https://github.com/Oziphos",
-          "followers_url": "https://api.github.com/users/Oziphos/followers",
-          "following_url": "https://api.github.com/users/Oziphos/following{/other_user}",
-          "gists_url": "https://api.github.com/users/Oziphos/gists{/gist_id}",
-          "starred_url": "https://api.github.com/users/Oziphos/starred{/owner}{/repo}",
-          "subscriptions_url": "https://api.github.com/users/Oziphos/subscriptions",
-          "organizations_url": "https://api.github.com/users/Oziphos/orgs",
-          "repos_url": "https://api.github.com/users/Oziphos/repos",
-          "events_url": "https://api.github.com/users/Oziphos/events{/privacy}",
-          "received_events_url": "https://api.github.com/users/Oziphos/received_events",
-          "type": "User",
-          "user_view_type": "public",
-          "site_admin": false,
-          "permissions": {
-            "admin": true,
-            "maintain": true,
-            "push": true,
-            "triage": true,
-            "pull": true
-          },
-          "role_name": "admin"
-        },
-        {
-          "login": "Oziphos",
-          "id": 106020906,
-          "node_id": "U_kgDOBlGZGg",
-          "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
-          "gravatar_id": "",
-          "url": "https://api.github.com/users/Oziphos",
-          "html_url": "https://github.com/Oziphos",
-          "followers_url": "https://api.github.com/users/Oziphos/followers",
-          "following_url": "https://api.github.com/users/Oziphos/following{/other_user}",
-          "gists_url": "https://api.github.com/users/Oziphos/gists{/gist_id}",
-          "starred_url": "https://api.github.com/users/Oziphos/starred{/owner}{/repo}",
-          "subscriptions_url": "https://api.github.com/users/Oziphos/subscriptions",
-          "organizations_url": "https://api.github.com/users/Oziphos/orgs",
-          "repos_url": "https://api.github.com/users/Oziphos/repos",
-          "events_url": "https://api.github.com/users/Oziphos/events{/privacy}",
-          "received_events_url": "https://api.github.com/users/Oziphos/received_events",
-          "type": "User",
-          "user_view_type": "public",
-          "site_admin": false,
-          "permissions": {
-            "admin": true,
-            "maintain": true,
-            "push": true,
-            "triage": true,
-            "pull": true
-          },
-          "role_name": "admin"
-        },
-        {
-          "login": "Oziphos",
-          "id": 106010976,
-          "node_id": "U_kgDOBlGZGg",
-          "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
-          "gravatar_id": "",
-          "url": "https://api.github.com/users/Oziphos",
-          "html_url": "https://github.com/Oziphos",
-          "followers_url": "https://api.github.com/users/Oziphos/followers",
-          "following_url": "https://api.github.com/users/Oziphos/following{/other_user}",
-          "gists_url": "https://api.github.com/users/Oziphos/gists{/gist_id}",
-          "starred_url": "https://api.github.com/users/Oziphos/starred{/owner}{/repo}",
-          "subscriptions_url": "https://api.github.com/users/Oziphos/subscriptions",
-          "organizations_url": "https://api.github.com/users/Oziphos/orgs",
-          "repos_url": "https://api.github.com/users/Oziphos/repos",
-          "events_url": "https://api.github.com/users/Oziphos/events{/privacy}",
-          "received_events_url": "https://api.github.com/users/Oziphos/received_events",
-          "type": "User",
-          "user_view_type": "public",
-          "site_admin": false,
-          "permissions": {
-            "admin": true,
-            "maintain": true,
-            "push": true,
-            "triage": true,
-            "pull": true
-          },
-          "role_name": "admin"
-        },
-        {
-          "login": "Oziphos",
-          "id": 106010406,
-          "node_id": "U_kgDOBlGZGg",
-          "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
-          "gravatar_id": "",
-          "url": "https://api.github.com/users/Oziphos",
-          "html_url": "https://github.com/Oziphos",
-          "followers_url": "https://api.github.com/users/Oziphos/followers",
-          "following_url": "https://api.github.com/users/Oziphos/following{/other_user}",
-          "gists_url": "https://api.github.com/users/Oziphos/gists{/gist_id}",
-          "starred_url": "https://api.github.com/users/Oziphos/starred{/owner}{/repo}",
-          "subscriptions_url": "https://api.github.com/users/Oziphos/subscriptions",
-          "organizations_url": "https://api.github.com/users/Oziphos/orgs",
-          "repos_url": "https://api.github.com/users/Oziphos/repos",
-          "events_url": "https://api.github.com/users/Oziphos/events{/privacy}",
-          "received_events_url": "https://api.github.com/users/Oziphos/received_events",
-          "type": "User",
-          "user_view_type": "public",
-          "site_admin": false,
-          "permissions": {
-            "admin": true,
-            "maintain": true,
-            "push": true,
-            "triage": true,
-            "pull": true
-          },
-          "role_name": "admin"
-        },
-        {
-          "login": "Oziphos",
-          "id": 106010806,
-          "node_id": "U_kgDOBlGZGg",
-          "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
-          "gravatar_id": "",
-          "url": "https://api.github.com/users/Oziphos",
-          "html_url": "https://github.com/Oziphos",
-          "followers_url": "https://api.github.com/users/Oziphos/followers",
-          "following_url": "https://api.github.com/users/Oziphos/following{/other_user}",
-          "gists_url": "https://api.github.com/users/Oziphos/gists{/gist_id}",
-          "starred_url": "https://api.github.com/users/Oziphos/starred{/owner}{/repo}",
-          "subscriptions_url": "https://api.github.com/users/Oziphos/subscriptions",
-          "organizations_url": "https://api.github.com/users/Oziphos/orgs",
-          "repos_url": "https://api.github.com/users/Oziphos/repos",
-          "events_url": "https://api.github.com/users/Oziphos/events{/privacy}",
-          "received_events_url": "https://api.github.com/users/Oziphos/received_events",
-          "type": "User",
-          "user_view_type": "public",
-          "site_admin": false,
-          "permissions": {
-            "admin": true,
-            "maintain": true,
-            "push": true,
-            "triage": true,
-            "pull": true
-          },
-          "role_name": "admin"
-        }
-      ]
-    })
+  // const resUsers = ref({
+  //     "success": true,
+  //     "data": [
+  //       {
+  //         "login": "Oziphos",
+  //         "id": 104010906,
+  //         "node_id": "U_kgDOBlGZGg",
+  //         "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
+  //         "gravatar_id": "",
+  //         "url": "https://api.github.com/users/Oziphos",
+  //         "html_url": "https://github.com/Oziphos",
+  //         "followers_url": "https://api.github.com/users/Oziphos/followers",
+  //         "following_url": "https://api.github.com/users/Oziphos/following{/other_user}",
+  //         "gists_url": "https://api.github.com/users/Oziphos/gists{/gist_id}",
+  //         "starred_url": "https://api.github.com/users/Oziphos/starred{/owner}{/repo}",
+  //         "subscriptions_url": "https://api.github.com/users/Oziphos/subscriptions",
+  //         "organizations_url": "https://api.github.com/users/Oziphos/orgs",
+  //         "repos_url": "https://api.github.com/users/Oziphos/repos",
+  //         "events_url": "https://api.github.com/users/Oziphos/events{/privacy}",
+  //         "received_events_url": "https://api.github.com/users/Oziphos/received_events",
+  //         "type": "User",
+  //         "user_view_type": "public",
+  //         "site_admin": false,
+  //         "permissions": {
+  //           "admin": true,
+  //           "maintain": true,
+  //           "push": true,
+  //           "triage": true,
+  //           "pull": true
+  //         },
+  //         "role_name": "admin"
+  //       },
+  //       {
+  //         "login": "Oziphos",
+  //         "id": 106020906,
+  //         "node_id": "U_kgDOBlGZGg",
+  //         "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
+  //         "gravatar_id": "",
+  //         "url": "https://api.github.com/users/Oziphos",
+  //         "html_url": "https://github.com/Oziphos",
+  //         "followers_url": "https://api.github.com/users/Oziphos/followers",
+  //         "following_url": "https://api.github.com/users/Oziphos/following{/other_user}",
+  //         "gists_url": "https://api.github.com/users/Oziphos/gists{/gist_id}",
+  //         "starred_url": "https://api.github.com/users/Oziphos/starred{/owner}{/repo}",
+  //         "subscriptions_url": "https://api.github.com/users/Oziphos/subscriptions",
+  //         "organizations_url": "https://api.github.com/users/Oziphos/orgs",
+  //         "repos_url": "https://api.github.com/users/Oziphos/repos",
+  //         "events_url": "https://api.github.com/users/Oziphos/events{/privacy}",
+  //         "received_events_url": "https://api.github.com/users/Oziphos/received_events",
+  //         "type": "User",
+  //         "user_view_type": "public",
+  //         "site_admin": false,
+  //         "permissions": {
+  //           "admin": true,
+  //           "maintain": true,
+  //           "push": true,
+  //           "triage": true,
+  //           "pull": true
+  //         },
+  //         "role_name": "admin"
+  //       },
+  //       {
+  //         "login": "Oziphos",
+  //         "id": 106010976,
+  //         "node_id": "U_kgDOBlGZGg",
+  //         "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
+  //         "gravatar_id": "",
+  //         "url": "https://api.github.com/users/Oziphos",
+  //         "html_url": "https://github.com/Oziphos",
+  //         "followers_url": "https://api.github.com/users/Oziphos/followers",
+  //         "following_url": "https://api.github.com/users/Oziphos/following{/other_user}",
+  //         "gists_url": "https://api.github.com/users/Oziphos/gists{/gist_id}",
+  //         "starred_url": "https://api.github.com/users/Oziphos/starred{/owner}{/repo}",
+  //         "subscriptions_url": "https://api.github.com/users/Oziphos/subscriptions",
+  //         "organizations_url": "https://api.github.com/users/Oziphos/orgs",
+  //         "repos_url": "https://api.github.com/users/Oziphos/repos",
+  //         "events_url": "https://api.github.com/users/Oziphos/events{/privacy}",
+  //         "received_events_url": "https://api.github.com/users/Oziphos/received_events",
+  //         "type": "User",
+  //         "user_view_type": "public",
+  //         "site_admin": false,
+  //         "permissions": {
+  //           "admin": true,
+  //           "maintain": true,
+  //           "push": true,
+  //           "triage": true,
+  //           "pull": true
+  //         },
+  //         "role_name": "admin"
+  //       },
+  //       {
+  //         "login": "Oziphos",
+  //         "id": 106010406,
+  //         "node_id": "U_kgDOBlGZGg",
+  //         "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
+  //         "gravatar_id": "",
+  //         "url": "https://api.github.com/users/Oziphos",
+  //         "html_url": "https://github.com/Oziphos",
+  //         "followers_url": "https://api.github.com/users/Oziphos/followers",
+  //         "following_url": "https://api.github.com/users/Oziphos/following{/other_user}",
+  //         "gists_url": "https://api.github.com/users/Oziphos/gists{/gist_id}",
+  //         "starred_url": "https://api.github.com/users/Oziphos/starred{/owner}{/repo}",
+  //         "subscriptions_url": "https://api.github.com/users/Oziphos/subscriptions",
+  //         "organizations_url": "https://api.github.com/users/Oziphos/orgs",
+  //         "repos_url": "https://api.github.com/users/Oziphos/repos",
+  //         "events_url": "https://api.github.com/users/Oziphos/events{/privacy}",
+  //         "received_events_url": "https://api.github.com/users/Oziphos/received_events",
+  //         "type": "User",
+  //         "user_view_type": "public",
+  //         "site_admin": false,
+  //         "permissions": {
+  //           "admin": true,
+  //           "maintain": true,
+  //           "push": true,
+  //           "triage": true,
+  //           "pull": true
+  //         },
+  //         "role_name": "admin"
+  //       },
+  //       {
+  //         "login": "Oziphos",
+  //         "id": 106010806,
+  //         "node_id": "U_kgDOBlGZGg",
+  //         "avatar_url": "https://avatars.githubusercontent.com/u/106010906?v=4",
+  //         "gravatar_id": "",
+  //         "url": "https://api.github.com/users/Oziphos",
+  //         "html_url": "https://github.com/Oziphos",
+  //         "followers_url": "https://api.github.com/users/Oziphos/followers",
+  //         "following_url": "https://api.github.com/users/Oziphos/following{/other_user}",
+  //         "gists_url": "https://api.github.com/users/Oziphos/gists{/gist_id}",
+  //         "starred_url": "https://api.github.com/users/Oziphos/starred{/owner}{/repo}",
+  //         "subscriptions_url": "https://api.github.com/users/Oziphos/subscriptions",
+  //         "organizations_url": "https://api.github.com/users/Oziphos/orgs",
+  //         "repos_url": "https://api.github.com/users/Oziphos/repos",
+  //         "events_url": "https://api.github.com/users/Oziphos/events{/privacy}",
+  //         "received_events_url": "https://api.github.com/users/Oziphos/received_events",
+  //         "type": "User",
+  //         "user_view_type": "public",
+  //         "site_admin": false,
+  //         "permissions": {
+  //           "admin": true,
+  //           "maintain": true,
+  //           "push": true,
+  //           "triage": true,
+  //           "pull": true
+  //         },
+  //         "role_name": "admin"
+  //       }
+  //     ]
+  //   })
   const resContributors = ref([
     {
       "login": "Oziphos",
