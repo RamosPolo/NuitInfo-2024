@@ -3,11 +3,11 @@ import CreditsComponent from '@/components/credits/CreditsComponent.vue'
 </script>
 
 <template>
-  <main>
-    <CreditsComponent />
-  </main>
+  <CreditsComponent />
+
 </template>
 
 <style scoped>
+
 
 </style>
