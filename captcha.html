@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Click the Intruders</title>
+<style>
+	canvas {
+		display: block;
+		margin: 0 auto;
+		background-color: #f0f0f0;
+	}
+	body {
+		text-align: center;
+		font-family: Arial, sans-serif;
+	}
+</style>
+</head>
+<body>
+<h1>Cliquez sur les intrus !</h1>
+<canvas id="gameCanvas" width="800" height="400"></canvas>
+<script>
+	const canvas = document.getElementById('gameCanvas');
+	const ctx = canvas.getContext('2d');
+
+	const intruderImage = new Image();
+		intruderImage.src = './/public/images/nemo.png';
+	const normalImage = new Image();
+		normalImage.src = './public/images/magicarpe.png';
+
+	// Game configuration
+	const intrusCount = 3; // Number of intruders
+	const normauxCount = 5; // Number of normal entities
+	const totalEntities = intrusCount + normauxCount;
+
+	// Game state
+	let entities = [];
+	let score = { intrusClicked: 0, normauxClicked: 0 };
+	let gameEnded = false;
+
+	// Entity constructor
+	function createEntity(isIntruder) {
+		return {
+		x: -50, // Start off-screen
+		y: Math.random() * (canvas.height - 50) + 25,
+		size: 30,
+		speed: Math.random() * 2 + 1, // Random speed between 1 and 3
+		color: isIntruder ? 'red' : 'blue',
+		isIntruder: isIntruder,
+		};
+	}
+
+	// Populate entities
+	function initializeEntities() {
+		entities = [];
+		for (let i = 0; i < intrusCount; i++) {
+		entities.push(createEntity(true));
+		}
+		for (let i = 0; i < normauxCount; i++) {
+		entities.push(createEntity(false));
+		}
+
+		// Shuffle entities so their order is random
+		entities = entities.sort(() => Math.random() - 0.5);
+	}
+
+	// Draw function
+	function drawEntity(entity) {
+		const img = entity.isIntruder ? intruderImage : normalImage;
+		ctx.drawImage(img, entity.x - entity.size, entity.y - entity.size, entity.size * 2, entity.size * 2);
+	}
+
+	function draw() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		// Draw all entities
+		for (const entity of entities) {
+		drawEntity(entity);
+		}
+
+		// Draw score
+		ctx.fillStyle = 'black';
+		ctx.font = '20px Arial';
+		ctx.fillText(`Intrus Clicked: ${score.intrusClicked}`, 10, 20);
+		ctx.fillText(`Normaux Clicked: ${score.normauxClicked}`, 10, 50);
+	}
+
+	// Update function
+	function update() {
+		for (const entity of entities) {
+		entity.x += entity.speed;
+		}
+
+		// Check if the game should end
+		if (entities.every((entity) => entity.x - entity.size > canvas.width || !entity.isIntruder)) {
+			endGame();
+		}
+	}
+
+	// End game and display score
+	function endGame() {
+		gameEnded = true;
+		alert(`Game Over!\nIntrus Clicked: ${score.intrusClicked}\nNormaux Clicked: ${score.normauxClicked}`);
+	}
+
+	// Handle clicks
+	canvas.addEventListener('click', (e) => {
+		if (gameEnded) return;
+
+		const rect = canvas.getBoundingClientRect();
+		const mouseX = e.clientX - rect.left;
+		const mouseY = e.clientY - rect.top;
+
+		for (let i = entities.length - 1; i >= 0; i--) {
+		const entity = entities[i];
+		const dist = Math.hypot(mouseX - entity.x, mouseY - entity.y);
+
+		if (dist < entity.size) {
+			if (entity.isIntruder) {
+				score.intrusClicked++;
+			} else {
+				score.normauxClicked++;
+			}
+
+			// Remove the clicked entity
+			entities.splice(i, 1);
+			break;
+		}
+		}
+	});
+
+	// Game loop
+	function gameLoop() {
+		if (!gameEnded) {
+			draw();
+			update();
+			requestAnimationFrame(gameLoop);
+		}
+	}
+
+	// Start game
+	initializeEntities();
+	gameLoop();
+</script>
+</body>
+</html>
