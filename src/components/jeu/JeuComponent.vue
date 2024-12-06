@@ -39,6 +39,9 @@
 </style>
 
 <script setup>
+
+
+
 import Phaser from 'phaser'
 import { onMounted } from 'vue';
 
@@ -61,6 +64,10 @@ const config = {
         preload: preload,
         create: create,
         update: update
+    },
+    scale: {
+        mode: Phaser.Scale.FIT, // Adapte le jeu pour qu'il reste visible en entier
+        autoCenter: Phaser.Scale.CENTER_BOTH // Centre automatiquement le jeu
     },
     pixelArt: true,
 };
@@ -90,6 +97,7 @@ let rame = false;
 
 let dechetGroup;
 let courantGroup;
+let magicarpGroup;
 
 let hpBar;
  
@@ -102,6 +110,7 @@ function preload() {
     this.load.image('bien', 'images/player/human-good.png');
     this.load.image('vomis', 'images/player/human-vomit.png');
     this.load.spritesheet('courant', 'images/courant.png', { frameWidth: 200, frameHeight: 200 });
+    this.load.spritesheet('magicarp', 'images/element/magicarp.png', { frameWidth: 200, frameHeight: 200 });
     this.load.spritesheet('player', 'images/player/bateau.png', { frameWidth: 200, frameHeight: 200 });
 }
 let visibilityOverlay;
@@ -115,6 +124,7 @@ function create() {
     initDechets.call(this);
     setupEvents.call(this);
     initCourant(this); 
+    initMagicarp.call(this, this);
 
     hpBar = this.add.graphics();
     updateHPBar.call(this);
@@ -166,9 +176,9 @@ function update() {
 
 // function change le desing du perso en fonction de sa vie
 function changeDesign() {
-    if (hp_player < 20) {
+    if (hp_player < 10) {
         perso.setTexture('vomis');
-    } else if (hp_player < 50) {
+    } else if (hp_player < 40) {
         perso.setTexture('malade');
     } else if (hp_player < 80) {
         perso.setTexture('bien');
@@ -231,7 +241,43 @@ function initAnimations() {
         frameRate: 10,
         repeat: -1
     });
+    this.anims.create({
+        key: 'magicarp',
+        frames: this.anims.generateFrameNumbers('magicarp', { frames: [0, 1] }),
+        frameRate: 8,
+        repeat: -1
+    });
 }
+
+function spawnMagicarp(numberOfMagicarp) {
+    for (let i = 0; i < numberOfMagicarp; i++) {
+        let { x, y } = generateRandomPosition(allEntities, border_width, border_height);
+        let magicarp = magicarpGroup.create(x, y, 'magicarp');
+        magicarp.setScale(0.5);
+        magicarp.setCircle(50, magicarp.width / 2 - 50, magicarp.height / 2 - 50);
+        magicarp.setDepth(0);
+        magicarp.play('magicarp');
+        allEntities.push(magicarp);
+
+        // Déplace les magicarp
+        this.tweens.add({
+            targets: magicarp,
+            x: Phaser.Math.Between(0, this.cameras.main.width),
+            y: Phaser.Math.Between(0, this.cameras.main.height),
+            duration: 5000,
+            ease: 'Linear',
+            repeat: -1,
+            yoyo: true
+        });
+    }
+}
+
+// Initialise les magicarp
+function initMagicarp(scene) {
+    magicarpGroup = scene.physics.add.group();
+    spawnMagicarp.call(scene, 10);
+}
+
 
 // Initialise les déchets
 function initDechets() {
