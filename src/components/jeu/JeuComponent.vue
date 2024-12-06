@@ -151,8 +151,26 @@ function update() {
     }
 
     perso.x = player.x;
-    perso.y = player.y;
+    perso.y = player.y - 15;
+
+    if (hp_player <= 0) {
+        handlePlayerDeath.call(this);
+    }
+
+    changeDesign.call(this);
 }
+
+// function change le desing du perso en fonction de sa vie
+function changeDesign() {
+    if (hp_player < 20) {
+        perso.setTexture('vomis');
+    } else if (hp_player < 50) {
+        perso.setTexture('malade');
+    } else if (hp_player < 80) {
+        perso.setTexture('bien');
+    } 
+}
+
 
 function updateHPBar() {
     const barWidth = 100; // Largeur de la barre
@@ -254,13 +272,6 @@ function movePlayer() {
 
     const keys = this.input.keyboard;
 
-    // Vérifie si le joueur a encore des PV avant de permettre le mouvement
-    if (hp_player <= 0) {
-        // Afficher un message de fin de jeu ou effectuer une action pour signaler la mort
-        this.add.text(400, 300, 'Game Over', { fontSize: '32px', fill: '#fff' });
-        return; // Arrête la fonction pour éviter toute autre interaction
-    }
-
     // Mouvement vers le haut
     if (keys.addKey(haut).isDown) {
         hp_player -= 0.03;
@@ -350,6 +361,37 @@ function handleCollisions() {
     });
 }
 
+// Fonction qui gère la mort du joueur
+function handlePlayerDeath() {
+
+    // Ajoute un fond gris
+    const graphics = this.add.graphics();
+    graphics.setDepth(100);
+    graphics.fillStyle(0x000000, 1); // Couleur grise
+    graphics.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+
+    // Affiche un message de fin de jeu
+    const gameOverText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'Game Over', {
+        fontSize: '64px',
+        fill: '#fff'
+    });
+    gameOverText.setOrigin(0.5, 0.5);
+    gameOverText.setDepth(101);
+
+    // Arrête toutes les animations et interactions
+    this.physics.pause();
+    player.anims.stop();
+
+    // Désactive les entrées du joueur
+    this.input.keyboard.enabled = false;
+
+    // Détruit tous les objets du jeu
+    dechetGroup.clear(true, true);
+    courantGroup.clear(true, true);
+    player.destroy();
+    perso.destroy();
+
+}
 
 // Affiche la barre de progression
 function showProgressBar() {
