@@ -159,46 +159,45 @@ function movePlayer() {
     player.setVelocityY(0);
 
     // Déplacement haut/bas/gauche/droite
-    if (cursors.up.isDown || this.input.keyboard.addKey(haut).isDown) {
+    if (this.input.keyboard.addKey(haut).isDown) {
         player.setVelocity(0, -speed);
-        player.setRotation(-90);
+        player.setRotation(Phaser.Math.DegToRad(270)); // Rotation vers le haut
         rame = true;
     }
-    if (cursors.down.isDown || this.input.keyboard.addKey(bas).isDown) {
+    if (this.input.keyboard.addKey(bas).isDown) {
         player.setVelocity(0, speed);
-        player.setRotation(90);
+        player.setRotation(Phaser.Math.DegToRad(90)); // Rotation vers le bas
         rame = true;
     }
-    if (cursors.right.isDown || this.input.keyboard.addKey(droite).isDown) {
+    if (this.input.keyboard.addKey(droite).isDown) {
         player.setVelocity(speed, 0);
-        player.setRotation(0);
+        player.setRotation(Phaser.Math.DegToRad(0)); // Rotation vers la droite
         rame = true;
     }
-    if (cursors.left.isDown || this.input.keyboard.addKey(gauche).isDown) {
+    if (this.input.keyboard.addKey(gauche).isDown) {
         player.setVelocity(-speed, 0);
-        player.setRotation(180);
+        player.setRotation(Phaser.Math.DegToRad(180)); // Rotation vers la gauche
         rame = true;
     }
-
+    
     // Déplacement diagonal
-    if ((cursors.up.isDown && cursors.left.isDown) || (this.input.keyboard.addKey(gauche).isDown && this.input.keyboard.addKey(haut).isDown)) {
+    if (this.input.keyboard.addKey(gauche).isDown && this.input.keyboard.addKey(haut).isDown) {
         player.setVelocity(-speed_diag, -speed_diag);
-        player.setRotation(-135);
+        player.setRotation(Phaser.Math.DegToRad(225)); // Rotation diagonale gauche-haut
     }
-    if ((cursors.up.isDown && cursors.right.isDown) || (this.input.keyboard.addKey(droite).isDown && this.input.keyboard.addKey(haut).isDown)) {
+    if (this.input.keyboard.addKey(droite).isDown && this.input.keyboard.addKey(haut).isDown) {
         player.setVelocity(speed_diag, -speed_diag);
-        player.setRotation(-45);
+        player.setRotation(Phaser.Math.DegToRad(315)); // Rotation diagonale droite-haut
     }
-    if ((cursors.down.isDown && cursors.left.isDown) || (this.input.keyboard.addKey(gauche).isDown && this.input.keyboard.addKey(bas).isDown)) {
+    if (this.input.keyboard.addKey(gauche).isDown && this.input.keyboard.addKey(bas).isDown) {
         player.setVelocity(-speed_diag, speed_diag);
-        player.setRotation(135);
+        player.setRotation(Phaser.Math.DegToRad(135)); // Rotation diagonale gauche-bas
     }
-    if ((cursors.down.isDown && cursors.right.isDown) || (this.input.keyboard.addKey(droite).isDown && this.input.keyboard.addKey(bas).isDown)) {
+    if (this.input.keyboard.addKey(droite).isDown && this.input.keyboard.addKey(bas).isDown) {
         player.setVelocity(speed_diag, speed_diag);
-        player.setRotation(45);
+        player.setRotation(Phaser.Math.DegToRad(45)); // Rotation diagonale droite-bas
     }
-}
-
+  }
 
 
 // Fonction pour faire spawn des dechets aléatoires
