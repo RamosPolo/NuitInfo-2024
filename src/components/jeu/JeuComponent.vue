@@ -1,8 +1,42 @@
 <template>
   <div id="jeu-eau">
     <div id="jeu"></div>
+    <div class="game-explanation">
+        <h2>Explication du Jeu</h2>
+        <p>Bienvenue dans notre jeu d'arcade ! Voici comment jouer :</p>
+        <ul>
+          <li>Utilisez les touches (ZQSD) pour déplacer votre personnage.</li>
+          <li>Collectez les déchets en appuyant sur la touche <strong>Espace</strong> lorsqu'ils sont à portée.</li>
+          <li>Rétablissez les courants marin avec la touche <strong>Espace</strong> plusieurs fois</li>
+          <li>Si il y a trop de dechet vous etes ralenti !</li>
+        </ul>
+        <p>Bonne chance et amusez-vous bien !</p>
+    </div>
   </div>
 </template>
+
+<style>
+.game-explanation {
+    position: absolute;
+    bottom: 0;
+
+    background-color: #f9f9f951;
+    color: #1e1e1e;
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+
+.game-explanation h2 {
+  margin-top: 0;
+}
+
+.game-explanation ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+</style>
 
 <script setup>
 import Phaser from 'phaser'
@@ -66,7 +100,7 @@ function preload() {
 function create() {
     initMap.call(this);
     initPlayer.call(this);
-    initPhysics.call(this);
+    //initPhysics.call(this);
     initAnimations.call(this);
     initDechets.call(this);
     setupEvents.call(this);
@@ -101,10 +135,10 @@ function initPlayer() {
 }
 
 // Initialise la physique
-function initPhysics() {
-    this.physics.world.createDebugGraphic();
-    this.physics.world.debugGraphic.setAlpha(0.75);
-}
+// function initPhysics() {
+//     this.physics.world.createDebugGraphic();
+//     this.physics.world.debugGraphic.setAlpha(0.75);
+// }
 
 // Initialise les animations
 function initAnimations() {
@@ -145,7 +179,7 @@ function setupEvents() {
     });
 
     this.time.addEvent({
-        delay: 100,
+        delay: 50,
         loop: true,
         callback: movedechets,
         callbackScope: this
@@ -217,7 +251,9 @@ let currentCourant = null;
 function handleCollisions() {
     this.physics.overlap(player, dechetGroup, (player, dechet) => {
         if (!currentCourant) {
-            showDechetInteractionBar.call(this, dechet); // Affiche une barre d'interaction
+            this.input.keyboard.on('keydown-SPACE', () => {
+            dechet.destroy();
+        });
         }
     });
 
@@ -266,83 +302,8 @@ function handleSpacePress() {
     }
 }
 
-let interactionBar, interactionZoneGreen, interactionZoneRed, movingBar;
-let movingBarDirection = 1;
-let interactionBarTimer;
-let isInteracting = false;
 
-// Affiche une barre d'interaction lorsqu'un déchet est détecté
-function showDechetInteractionBar(dechet) {
-    if (isInteracting) return;
 
-    isInteracting = true;
-
-    const barWidth = 200;
-    const barHeight = 20;
-    const greenZoneWidth = 50; // Largeur de la zone verte
-    const redZoneWidth = barWidth - greenZoneWidth; // Largeur de la zone rouge
-    const x = player.x - barWidth / 2;
-    const y = player.y - 100;
-
-    interactionBar = this.add.graphics();
-    interactionBar.fillStyle(0x000000, 1); // Couleur noire pour le cadre
-    interactionBar.fillRect(x - 2, y - 2, barWidth + 4, barHeight + 4); // Cadre noir
-
-    // Zone verte
-    interactionZoneGreen = this.add.graphics();
-    interactionZoneGreen.fillStyle(0x00ff00, 1);
-    interactionZoneGreen.fillRect(x, y, greenZoneWidth, barHeight);
-
-    // Zone rouge
-    interactionZoneRed = this.add.graphics();
-    interactionZoneRed.fillStyle(0xff0000, 1);
-    interactionZoneRed.fillRect(x + greenZoneWidth, y, redZoneWidth, barHeight);
-
-    // Barre noire mobile
-    movingBar = this.add.graphics();
-    movingBar.fillStyle(0x000000, 1);
-    let movingBarX = x; // Position initiale de la barre noire
-    movingBar.fillRect(movingBarX, y, 10, barHeight);
-
-    // Animation de la barre noire
-    interactionBarTimer = this.time.addEvent({
-        delay: 16, // 60 FPS
-        loop: true,
-        callback: () => {
-            movingBarX += movingBarDirection * 4; // Vitesse de déplacement
-            if (movingBarX <= x || movingBarX >= x + barWidth - 10) {
-                movingBarDirection *= -1; // Inverse la direction
-            }
-            movingBar.clear();
-            movingBar.fillRect(movingBarX, y, 10, barHeight);
-        }
-    });
-
-    // Gestion de la touche espace
-    this.input.keyboard.once('keydown-SPACE', () => {
-        checkBarPosition.call(this, movingBarX, x, greenZoneWidth, dechet);
-    });
-}
-
-// Vérifie si la barre noire est dans la zone verte
-function checkBarPosition(movingBarX, barStartX, greenZoneWidth, dechet) {
-    const greenStart = barStartX;
-    const greenEnd = barStartX + greenZoneWidth;
-
-    if (movingBarX >= greenStart && movingBarX <= greenEnd) {
-        // La barre noire est dans la zone verte
-        dechet.destroy(); // Supprime le déchet
-    }
-
-    // Supprime les graphiques de la barre
-    interactionBar.destroy();
-    interactionZoneGreen.destroy();
-    interactionZoneRed.destroy();
-    movingBar.destroy();
-
-    interactionBarTimer.remove(false); // Arrête le timer
-    isInteracting = false;
-}
 
 // Joue les animations du joueur
 function playAnimations() {
