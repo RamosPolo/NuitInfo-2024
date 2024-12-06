@@ -66,6 +66,7 @@ const config = {
 };
 
 let player;
+let perso;
 let map;
 
 let haut = 'Z';
@@ -74,6 +75,8 @@ let gauche = 'Q';
 let droite = 'D';
 
 let baseSpeed = 500;
+let hp_player = 100;
+
 let currentSpeed = baseSpeed;
 let speedDiag;
 let ratio_map_vu_width = 4;
@@ -88,24 +91,48 @@ let rame = false;
 let dechetGroup;
 let courantGroup;
 
+let hpBar;
+ 
+
 // Précharge les ressources
 function preload() {
     this.load.image('map', 'images/map.png');
     this.load.image('dechet', 'images/element/dechet3.png');
+    this.load.image('malade', 'images/player/human-tired.png');
+    this.load.image('bien', 'images/player/human-good.png');
+    this.load.image('vomis', 'images/player/human-vomit.png');
     this.load.spritesheet('courant', 'images/courant.png', { frameWidth: 200, frameHeight: 200 });
     this.load.spritesheet('player', 'images/player/bateau.png', { frameWidth: 200, frameHeight: 200 });
 }
+let visibilityOverlay;
 
 // Initialise les objets de la scène
 function create() {
     initMap.call(this);
     initPlayer.call(this);
-    //initPhysics.call(this);
+    initPhysics.call(this);
     initAnimations.call(this);
     initDechets.call(this);
     setupEvents.call(this);
     initCourant(this); 
+
+    hpBar = this.add.graphics();
+    updateHPBar.call(this);
+
+    visibilityOverlay = this.add.rectangle(
+        this.cameras.main.width / 2, 
+        this.cameras.main.height / 2, 
+        this.cameras.main.width, 
+        this.cameras.main.height, 
+        0x000000, // Couleur noire
+        0 // Opacité initiale (transparent)
+    );
+    visibilityOverlay.setScrollFactor(0); // Pour qu'il reste fixe par rapport à la caméra
+    visibilityOverlay.setDepth(100);
+  
 }
+
+ 
 
 // Mets à jour la scène à chaque frame
 function update() {
@@ -113,6 +140,31 @@ function update() {
     movePlayer.call(this); // Déplace le joueur
     handleCollisions.call(this); // Gère les collisions
     playAnimations(); // Joue les animations du joueur
+    updateHPBar()
+
+    if (hp_player < 50) {
+        // Augmente l'opacité progressivement lorsque les PV sont bas
+        visibilityOverlay.setAlpha((50 - hp_player) / 50); // Alpha entre 0 (transparent) et 1 (opaque)
+    } else {
+        // Rend l'overlay invisible si les PV sont restaurés
+        visibilityOverlay.setAlpha(0);
+    }
+
+    perso.x = player.x;
+    perso.y = player.y;
+}
+
+function updateHPBar() {
+    const barWidth = 100; // Largeur de la barre
+    const barHeight = 10; // Hauteur de la barre
+    const x = player.x - barWidth / 2;
+    const y = player.y - 100; // Position au-dessus du joueur
+
+    hpBar.clear();
+    hpBar.fillStyle(0x808080, 1); // Couleur de fond (gris)
+    hpBar.fillRect(x, y, barWidth, barHeight); // Dessine la barre de fond
+    hpBar.fillStyle(0xff0000, 1); // Couleur des PV (rouge)
+    hpBar.fillRect(x, y, (hp_player / 100) * barWidth, barHeight); // Dessine les PV restants
 }
 
 // Initialise la map et ses paramètres
@@ -126,6 +178,9 @@ function initMap() {
 
 // Initialise le joueur
 function initPlayer() {
+    perso = this.add.image(100, 100, 'bien');
+    perso.setScale(0.5);
+    perso.setDepth(2);
     player = this.physics.add.sprite(100, 100, 'player');
     player.setScale(0.7);
     player.setCollideWorldBounds(true);
@@ -135,10 +190,10 @@ function initPlayer() {
 }
 
 // Initialise la physique
-// function initPhysics() {
-//     this.physics.world.createDebugGraphic();
-//     this.physics.world.debugGraphic.setAlpha(0.75);
-// }
+function initPhysics() {
+    this.physics.world.createDebugGraphic();
+    this.physics.world.debugGraphic.setAlpha(0.75);
+}
 
 // Initialise les animations
 function initAnimations() {
@@ -159,7 +214,7 @@ function initAnimations() {
 // Initialise les déchets
 function initDechets() {
     dechetGroup = this.physics.add.group();
-    spawndechets.call(this, 10);
+    spawndechets.call(this, 15);
 }
 
 // Initialise les courant
@@ -189,7 +244,7 @@ function setupEvents() {
 // Ajuste la vitesse du joueur en fonction du nombre de déchets
 function updateSpeed() {
     const dechetCount = dechetGroup.getChildren().length;
-    currentSpeed = baseSpeed * Math.max(1 - dechetCount * 0.01, 0.2); // Réduit la vitesse, minimum 20%
+    currentSpeed = baseSpeed * Math.max(1 - dechetCount * 0.02, 0.2); // Réduit la vitesse, minimum 20%
     speedDiag = currentSpeed * (Math.sqrt(2) / 2);
 }
 
@@ -199,29 +254,49 @@ function movePlayer() {
 
     const keys = this.input.keyboard;
 
+    // Vérifie si le joueur a encore des PV avant de permettre le mouvement
+    if (hp_player <= 0) {
+        // Afficher un message de fin de jeu ou effectuer une action pour signaler la mort
+        this.add.text(400, 300, 'Game Over', { fontSize: '32px', fill: '#fff' });
+        return; // Arrête la fonction pour éviter toute autre interaction
+    }
+
+    // Mouvement vers le haut
     if (keys.addKey(haut).isDown) {
+        hp_player -= 0.03;
         player.setVelocityY(-currentSpeed);
         player.setRotation(Phaser.Math.DegToRad(270));
         rame = true;
-    }
+     }
+
+    // Mouvement vers le bas
     if (keys.addKey(bas).isDown) {
+        hp_player -= 0.03;
         player.setVelocityY(currentSpeed);
         player.setRotation(Phaser.Math.DegToRad(90));
         rame = true;
-    }
+     }
+
+    // Mouvement vers la droite
     if (keys.addKey(droite).isDown) {
+        hp_player -= 0.03;
         player.setVelocityX(currentSpeed);
         player.setRotation(Phaser.Math.DegToRad(0));
         rame = true;
-    }
+     }
+
+    // Mouvement vers la gauche
     if (keys.addKey(gauche).isDown) {
+        hp_player -= 0.03;
         player.setVelocityX(-currentSpeed);
         player.setRotation(Phaser.Math.DegToRad(180));
         rame = true;
-    }
+     }
 
+    // Gérer les mouvements diagonaux (si vous en avez besoin)
     handleDiagonalMovement(keys);
 }
+
 
 // Gère le déplacement diagonal
 function handleDiagonalMovement(keys) {
@@ -249,14 +324,23 @@ let currentCourant = null;
 
 // Gère les collisions
 function handleCollisions() {
-    this.physics.overlap(player, dechetGroup, (player, dechet) => {
+    // Collision avec un déchet
+    this.input.keyboard.on('keydown-SPACE', () => {
         if (!currentCourant) {
-            this.input.keyboard.on('keydown-SPACE', () => {
-            dechet.destroy();
-        });
+            // Vérifie si le joueur est proche d'un déchet
+            dechetGroup.children.iterate((dechet) => {
+                if (
+                    Phaser.Math.Distance.Between(player.x, player.y, dechet.x, dechet.y) < 50
+                ) {
+                    dechet.destroy();
+                    hp_player += 3; // Augmente les PV
+                    updateHPBar(); // Met à jour la barre de PV
+                }
+            });
         }
     });
 
+    // Collision avec un courant
     this.physics.overlap(player, courantGroup, (player, courant) => {
         if (!currentCourant) {
             currentCourant = courant;
@@ -265,6 +349,7 @@ function handleCollisions() {
         }
     });
 }
+
 
 // Affiche la barre de progression
 function showProgressBar() {
@@ -289,12 +374,13 @@ function updateProgressBar() {
 // Gère les pressions sur la touche espace
 function handleSpacePress() {
     if (currentCourant) {
-        progress += 10; // Ajustez la valeur selon vos besoins
+        progress += 10; // Ajuste la valeur selon vos besoins
         updateProgressBar.call(this);
 
         if (progress >= 100) {
             currentCourant.destroy();
             progressBar.destroy();
+            hp_player += 8; // Ajoute 1 PV lorsque le courant est réparé
             progress = 0;
             currentCourant = null;
             this.input.keyboard.off('keydown-SPACE', handleSpacePress, this);
@@ -328,6 +414,7 @@ function spawndechets(numberOfdechets) {
         dechet.setCircle(50, dechet.width / 2 - 50, dechet.height / 2 - 50);
         dechet.setDepth(0);
         allEntities.push(dechet);
+        hp_player -= 1;
     }
 }
 
@@ -340,6 +427,7 @@ function spawncourants(numberOfdechets) {
         courant.body.setSize(courant.width, courant.height * 0.6); 
         courant.setDepth(0);
         allEntities.push(courant);
+        hp_player -= 1;
     }
 }
 
