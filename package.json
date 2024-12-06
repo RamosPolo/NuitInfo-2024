@@ -2,6 +2,7 @@
   "name": "nuitinfo-2024",
   "version": "0.0.0",
   "private": true,
+  "proxy": "http://localhost:3000",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,10 +12,14 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "aos": "^2.3.4",
+    "apexcharts": "^4.1.0",
+    "axios": "^1.7.9",
     "phaser": "^3.87.0",
     "pinia": "^2.2.6",
     "vue": "^3.5.13",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "vue3-apexcharts": "^1.8.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",

@@ -46,6 +46,9 @@
 
 import Phaser from 'phaser'
 import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter()
 
 onMounted(() => {
     new Phaser.Game(config);
@@ -410,16 +413,16 @@ function handleCollisions() {
             showProgressBar.call(this);
             this.input.keyboard.on('keydown-SPACE', handleSpacePress, this);
         }
-		const i = setInterval(() => {
-			if (currentCourant == null)
-				clearInterval(i);
-			else if (!this.physics.overlap(player, currentCourant)){
-				progressBar.destroy();
-				progress = 0;
-				currentCourant = null;
-				this.input.keyboard.off('keydown-SPACE', handleSpacePress, this);
-			}
-		}, 500);
+        const i = setInterval(() => {
+            if (currentCourant == null)
+                clearInterval(i);
+            else if (!this.physics.overlap(player, currentCourant)) {
+                progressBar.destroy();
+                progress = 0;
+                currentCourant = null;
+                this.input.keyboard.off('keydown-SPACE', handleSpacePress, this);
+            }
+        }, 500);
     });
 }
 
@@ -452,6 +455,8 @@ function handlePlayerDeath() {
     courantGroup.clear(true, true);
     player.destroy();
     perso.destroy();
+
+    router.push('/credits')
 
 }
 
