@@ -1,9 +1,10 @@
 <template>
 
   <div class="bg-gray-100 flex flex-col items-center justify-center min-h-screen text-center">
-    <!-- Filter Dropdown -->
     <div class="container mx-auto p-6">
-      <h3 class="text-3xl font-semibold mb-8">Choisissez votre Pokémon !</h3>
+
+      <h1 class="text-3xl font-semibold mb-8 underline">Bienvenue dans <strong> JEU DE L'EAU !</strong></h1>
+      <h3 class="text-2xl font-semibold mb-8">Choisissez votre Pokémon !</h3>
 
       <div class="mb-12">
         <select v-model="selectedType" class="p-2 border rounded-lg">
@@ -25,18 +26,18 @@
             class="w-80 mx-auto h-80 object-contain rounded-lg">
 
           <div v-if="hoveredCards[img.img]"
-            class="flex flex-col items-center justify-center bg-white/100 rounded-b-lg border-t my-12">
-            <h3 class="text-lg font-bold mb-2 mt-6">Modificateurs</h3>
+            class="flex flex-col items-center justify-center bg-white/100 rounded-b-lg border-t my-12 ">
+            <h3 class="text-lg font-bold mb-2 mt-6  text-2xl">Modificateurs</h3>
             <table class="text-sm text-gray-700 w-72">
               <thead>
-                <tr class="border-b space-x-4 w-full">
+                <tr class="border-b space-x-4 w-full text-2xl">
                   <th class="px-2">Vitesse</th>
                   <th class="px-2">Force</th>
                   <th class="px-2">Vie</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
+                <tr class="text-xl">
                   <td class="px-2 p-4">{{ img.vitesse }}%</td>
                   <td class="px-2 p-4">{{ img.force }}%</td>
                   <td class="px-2 p-4">{{ img.vie }}%</td>
@@ -63,6 +64,7 @@ const selectedImage = ref('');
 const pokemonStats = ref([]);
 const typesPokemon = ref({});
 const selectedType = ref('');
+const selectedStats = ref(null);
 
 // Filtered Pokémon based on selected type
 const filteredPokemon = computed(() => {
@@ -126,9 +128,20 @@ const unhoverImage = (img) => {
 
 // Handle Pokémon image selection
 const selectImage = (img) => {
-  flippedCards.value[img] = !flippedCards.value[img];
-  selectedImage.value = img.split(".png")[0];
-  localStorage.setItem("pokemonSelected", selectedImage.value);
+  flippedCards.value[img] = !flippedCards.value[img]; // Basculer l'état "flipped"
+  selectedImage.value = img.split(".png")[0]; // Extraire le nom sans l'extension
+
+  // Trouver les statistiques associées
+  const pokemonData = pokemonStats.value.find(stat => stat.id === parseInt(selectedImage.value));
+  if (pokemonData) {
+    selectedStats.value = pokemonData; // Stocker les statistiques du Pokémon sélectionné
+  }
+
+  // Enregistrer dans le stockage local
+  localStorage.setItem("pokemonSelected", JSON.stringify({
+    name: selectedImage.value,
+    stats: selectedStats.value
+  }));
 };
 
 // Watch for changes in selected type to reset hover and flip states
