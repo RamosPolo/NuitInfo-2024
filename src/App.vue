@@ -2,13 +2,9 @@
 
 import modal from './components/modal/modalComponent.vue';
 
-
-
-
 </script>
-
 <template>
-  <modal />
+  <RouterView />
 </template>
 
 <style scoped>

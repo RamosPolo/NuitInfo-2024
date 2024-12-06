@@ -1,0 +1,8 @@
+[
+    { "id": 1, "vitesse": -15, "force": 30, "vie": 20 , "type":"plante"},
+    { "id": 2, "vitesse": 10, "force": 25, "vie": 35, "type":"neutre" },
+    { "id": 3, "vitesse": -5, "force": 40, "vie": 25, "type":"feu" },
+    { "id": 4, "vitesse": 20, "force": 15, "vie": 50 , "type":"poison"},
+    { "id": 5, "vitesse": 5, "force": 35, "vie": 30 , "type":"eau"},
+    { "id": 6, "vitesse": 15, "force": 20, "vie": 40 , "type":"eau"}
+]
