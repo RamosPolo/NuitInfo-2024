@@ -410,6 +410,16 @@ function handleCollisions() {
             showProgressBar.call(this);
             this.input.keyboard.on('keydown-SPACE', handleSpacePress, this);
         }
+		const i = setInterval(() => {
+			if (currentCourant == null)
+				clearInterval(i);
+			else if (!this.physics.overlap(player, currentCourant)){
+				progressBar.destroy();
+				progress = 0;
+				currentCourant = null;
+				this.input.keyboard.off('keydown-SPACE', handleSpacePress, this);
+			}
+		}, 500);
     });
 }
 
