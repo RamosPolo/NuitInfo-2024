@@ -29,10 +29,16 @@
 		normalImage.src = './public/images/magicarpe.png';
 
 	// Game configuration
-	const intrusCount = 3; // Number of intruders
-	const normauxCount = 5; // Number of normal entities
-	const totalEntities = intrusCount + normauxCount;
+	fetch('./data.json').then((response) => response.json())
+	.then((data) => {
+		const intrusCount = data.intrusCount;
+      const normauxCount = data.normauxCount;
 
+		// Start the game after fetching data
+      initializeEntities(intrusCount, normauxCount);
+		gameLoop();
+	})
+	
 	// Game state
 	let entities = [];
 	let score = { intrusClicked: 0, normauxClicked: 0 };
@@ -51,7 +57,7 @@
 	}
 
 	// Populate entities
-	function initializeEntities() {
+	function initializeEntities(intrusCount, normauxCount) {
 		entities = [];
 		for (let i = 0; i < intrusCount; i++) {
 		entities.push(createEntity(true));
@@ -137,10 +143,6 @@
 			requestAnimationFrame(gameLoop);
 		}
 	}
-
-	// Start game
-	initializeEntities();
-	gameLoop();
 </script>
 </body>
 </html>
