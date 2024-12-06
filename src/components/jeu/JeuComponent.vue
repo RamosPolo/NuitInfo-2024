@@ -119,7 +119,7 @@ let visibilityOverlay;
 function create() {
     initMap.call(this);
     initPlayer.call(this);
-    initPhysics.call(this);
+    // initPhysics.call(this);
     initAnimations.call(this);
     initDechets.call(this);
     setupEvents.call(this);
@@ -222,10 +222,10 @@ function initPlayer() {
 }
 
 // Initialise la physique
-function initPhysics() {
-    this.physics.world.createDebugGraphic();
-    this.physics.world.debugGraphic.setAlpha(0.75);
-}
+// function initPhysics() {
+//     this.physics.world.createDebugGraphic();
+//     this.physics.world.debugGraphic.setAlpha(0.75);
+// }
 
 // Initialise les animations
 function initAnimations() {
