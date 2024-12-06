@@ -2,13 +2,13 @@
   <div id="jeu-eau">
     <div id="jeu"></div>
     <div class="game-explanation">
-        <h2>Explication du Jeu</h2>
+        <h2>Explications sur le Jeu</h2>
         <p>Bienvenue dans notre jeu d'arcade ! Voici comment jouer :</p>
         <ul>
           <li>Utilisez les touches (ZQSD) pour déplacer votre personnage.</li>
           <li>Collectez les déchets en appuyant sur la touche <strong>Espace</strong> lorsqu'ils sont à portée.</li>
-          <li>Rétablissez les courants marin avec la touche <strong>Espace</strong> plusieurs fois</li>
-          <li>Si il y a trop de dechet vous etes ralenti !</li>
+          <li>Rétablissez les courants marins avec la touche <strong>Espace</strong> plusieurs fois</li>
+          <li>S'il y a trop de déchets, vous êtes ralentis !</li>
         </ul>
         <p>Bonne chance et amusez-vous bien !</p>
     </div>
@@ -129,6 +129,10 @@ function create() {
     );
     visibilityOverlay.setScrollFactor(0); // Pour qu'il reste fixe par rapport à la caméra
     visibilityOverlay.setDepth(100);
+
+	setTimeout(() => {
+		document.getElementById("jeu-eau").removeChild(document.getElementsByClassName("game-explanation")[0]);
+	}, 15000);
   
 }
 
