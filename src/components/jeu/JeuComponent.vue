@@ -53,11 +53,13 @@ let allEntities = [];
 let rame = false;
 
 let dechetGroup;
+let courantGroup;
 
 // Précharge les ressources
 function preload() {
     this.load.image('map', 'images/map.png');
     this.load.image('dechet', 'images/element/dechet3.png');
+    this.load.spritesheet('courant', 'images/courant.png', { frameWidth: 200, frameHeight: 200 });
     this.load.spritesheet('player', 'images/player/bateau.png', { frameWidth: 200, frameHeight: 200 });
 }
 
@@ -69,6 +71,7 @@ function create() {
     initAnimations.call(this);
     initDechets.call(this);
     setupEvents.call(this);
+    initCourant(this); 
 }
 
 // Mets à jour la scène à chaque frame
@@ -108,8 +111,14 @@ function initPhysics() {
 function initAnimations() {
     this.anims.create({
         key: 'ramer',
-        frames: this.anims.generateFrameNumbers('player', { frames: [0, 1, 2, 3, 4, 6, 7] }),
+        frames: this.anims.generateFrameNumbers('player', { frames: [0, 1] }),
         frameRate: 8,
+        repeat: -1
+    });
+    this.anims.create({
+        key: 'courant',
+        frames: this.anims.generateFrameNumbers('courant', { frames: [0, 1, 2, 3, 4, 6, 7, 8, 9] }),
+        frameRate: 10,
         repeat: -1
     });
 }
@@ -118,6 +127,12 @@ function initAnimations() {
 function initDechets() {
     dechetGroup = this.physics.add.group();
     spawndechets.call(this, 10);
+}
+
+// Initialise les courant
+function initCourant(scene) {
+    courantGroup = scene.physics.add.group();
+    spawncourants.call(scene, 30);
 }
 
 // Configure les événements
@@ -200,6 +215,10 @@ function handleCollisions() {
     this.physics.overlap(player, dechetGroup, (player, dechet) => {
         dechet.destroy();
     });
+
+    this.physics.overlap(player, courantGroup, (player, courant) => {
+      courant.destroy();
+    });
 }
 
 // Joue les animations du joueur
@@ -210,6 +229,10 @@ function playAnimations() {
     } else {
         player.anims.stop();
     }
+    
+    courantGroup.getChildren().forEach(courant => {
+        courant.anims.play('courant', true);
+    });
 }
 
 // Ajoute des déchets sur la carte
@@ -218,9 +241,21 @@ function spawndechets(numberOfdechets) {
         let { x, y } = generateRandomPosition(allEntities, border_width, border_height);
         let dechet = dechetGroup.create(x, y, 'dechet');
         dechet.setScale(0.5);
-        dechet.setCollideWorldBounds(true);
+        dechet.setCircle(50, dechet.width / 2 - 50, dechet.height / 2 - 50);
         dechet.setDepth(0);
         allEntities.push(dechet);
+    }
+}
+
+// Ajoute des courants sur la carte
+function spawncourants(numberOfdechets) {
+    for (let i = 0; i < numberOfdechets; i++) {
+        let { x, y } = generateRandomPosition(allEntities, border_width, border_height);
+        let courant = courantGroup.create(x, y, 'courant');
+        courant.setScale(0.5);
+        courant.setCircle(50, courant.width / 2 - 50, courant.height / 2 - 50);
+        courant.setDepth(0);
+        allEntities.push(courant);
     }
 }
 
