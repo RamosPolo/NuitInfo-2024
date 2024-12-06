@@ -1,10 +1,10 @@
 <template>
 
-  <div class="bg-gray-100 flex flex-col items-center justify-center min-h-screen text-center">
+  <div class="bg-gray-100 flex flex-col items-center justify-center min-h-screen text-center ">
     <div class="container mx-auto p-6">
 
-      <h1 class="text-3xl font-semibold mb-8 underline ">Bienvenue dans <strong> JEU DE L'EAU !</strong></h1>
-      <h3 class="text-2xl font-semibold mb-8">Choisissez votre Pokémon !</h3>
+      <h1 class="text-4xl font-semibold mb-8 underline ">Bienvenue dans <strong> JEU DE L'EAU !</strong></h1>
+      <h3 class="text-3xl font-semibold mb-8">Choisissez votre Pokémon !</h3>
 
       <div class="mb-12">
         <select v-model="selectedType" class="p-2 border rounded-lg">
@@ -15,12 +15,13 @@
         </select>
       </div>
 
-      <div v-if="Object.values(hoveredCards).includes(true)" class="fixed inset-0 backdrop-blur-md bg-gray-300/40 z-10">
+      <div v-if="Object.values(hoveredCards).includes(true)"
+        class="fixed inset-0 backdrop-blur-md bg-gray-300/40 z-10 ">
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-6">
         <div v-for="img in filteredPokemon" :key="img.img"
-          class="relative w-100 h-100 cursor-pointer bg-white rounded shadow-lg transform transition-transform hover:scale-80 hover:z-10 z-0  "
+          class="relative w-100 h-100 cursor-pointer bg-white rounded shadow-lg transform transition-transform duration-300 ease-in-out hover:scale-110 hover:z-10 z-0"
           @mouseenter="hoverImage(img.img)" @mouseleave="unhoverImage(img.img)" @click="selectImage(img.img)">
           <img :src="flippedCards[img.img] || hoveredCards[img.img] ? `./img/${img.qr}` : `./img/${img.img}`"
             class="w-80 mx-auto h-80 object-contain rounded-lg">
@@ -150,13 +151,11 @@ const selectImage = (img) => {
   emit('popModal');
 };
 
-// Watch for changes in selected type to reset hover and flip states
 watch(selectedType, () => {
   hoveredCards.value = {};
   flippedCards.value = {};
 });
 
-// Fetch data on mount
 onMounted(() => {
   fetchImageName();
   fetchImageStats();

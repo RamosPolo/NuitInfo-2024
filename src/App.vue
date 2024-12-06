@@ -1,7 +1,4 @@
 <script setup>
-
-import modal from './components/modal/modalComponent.vue';
-
 </script>
 <template>
   <RouterView />
