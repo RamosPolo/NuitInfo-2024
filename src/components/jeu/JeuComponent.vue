@@ -1,20 +1,16 @@
 <template>
-  <div id="jeu-eau">
-    <h1>Jeu </h1>
-    <div id="jeu"></div>
-  </div>
+    <div id="jeu-eau">
+        <div id="jeu"></div>
+    </div>
 </template>
 
 <script setup>
 import Phaser from 'phaser'
 import { onMounted } from 'vue';
 
-
 onMounted(() => {
-    // Initialise le jeu lorsque le composant est monté
     new Phaser.Game(config);
 });
-
 
 const config = {
     width: 1200,
@@ -35,8 +31,6 @@ const config = {
     pixelArt: true,
 };
 
-
-
 let player;
 let map;
 
@@ -45,75 +39,103 @@ let bas = 'S';
 let gauche = 'Q';
 let droite = 'D';
 
-let ratio_map_vu_width = 4; // map.width/config.width
-let ration_map_vu_height = 4; // map.height/config.height
-
-let speed = 400;
-let speed_diag = speed * (Math.sqrt(2) / 2); // règle de trigo pour le déplacement
+let baseSpeed = 500;
+let currentSpeed = baseSpeed;
+let speedDiag;
+let ratio_map_vu_width = 4;
+let ration_map_vu_height = 4;
 
 let border_height;
 let border_width;
 
-
-let allEntities = []; // liste des pos de chaque entité
-
-
-// let marche = false;
-
+let allEntities = [];
+let rame = false;
 
 let dechetGroup;
+let courantGroup;
 
-
-let playerCollider;
-let cursors;
-    
-
+// Précharge les ressources
 function preload() {
     this.load.image('map', 'images/map.png');
-    this.load.image('dechet', 'images/rocher/rocher.png');
-
-    this.load.spritesheet('player', 'images/player/player_annimation.png', { frameWidth: 270, frameHeight: 270 });
+    this.load.image('dechet', 'images/element/dechet3.png');
+    this.load.spritesheet('courant', 'images/courant.png', { frameWidth: 200, frameHeight: 200 });
+    this.load.spritesheet('player', 'images/player/bateau.png', { frameWidth: 200, frameHeight: 200 });
 }
 
+// Initialise les objets de la scène
 function create() {
-    // Création de la map
-    map = this.add.image(config.width * ratio_map_vu_width / 2, config.height * ration_map_vu_height / 2, 'map');
+    initMap.call(this);
+    initPlayer.call(this);
+    initPhysics.call(this);
+    initAnimations.call(this);
+    initDechets.call(this);
+    setupEvents.call(this);
+    initCourant(this);
+}
 
-    // Création des variables de bordures de la map
+// Mets à jour la scène à chaque frame
+function update() {
+    updateSpeed(); // Ajuste la vitesse en fonction des déchets
+    movePlayer.call(this); // Déplace le joueur
+    handleCollisions.call(this); // Gère les collisions
+    playAnimations(); // Joue les animations du joueur
+}
+
+// Initialise la map et ses paramètres
+function initMap() {
+    map = this.add.image(config.width * ratio_map_vu_width / 2, config.height * ration_map_vu_height / 2, 'map');
     border_height = map.height;
     border_width = map.width;
+    this.physics.world.setBounds(0, 0, border_width, border_height);
+    this.cameras.main.setBounds(0, 0, border_width, border_height);
+}
 
-    // Création du joueur
+// Initialise le joueur
+function initPlayer() {
     player = this.physics.add.sprite(100, 100, 'player');
-    player.setScale(0.43);
+    player.setScale(0.7);
     player.setCollideWorldBounds(true);
     player.setCircle(80, player.width / 2 - 80, player.height / 2 - 80);
     player.setDepth(1);
-
-    // Création du collider invisible devant le joueur (main)
-    playerCollider = this.physics.add.image(player.x, player.y, null);
-    playerCollider.setDisplaySize(50, 50); // Taille du collider
-    playerCollider.visible = false; // Rendre le collider invisible
-
-    // Création des bordures de la carte
-    this.physics.world.setBounds(0, 0, border_width, border_height);
-
-    // Création de la caméra
-    this.cameras.main.setBounds(0, 0, border_width, border_height);
     this.cameras.main.startFollow(player);
+}
 
-    // Création des touches directionnelles
-    cursors = this.input.keyboard.createCursorKeys();
-
-    // Activation du débogage des collisions
+// Initialise la physique
+function initPhysics() {
     this.physics.world.createDebugGraphic();
     this.physics.world.debugGraphic.setAlpha(0.75);
+}
 
-    // Création du groupe de dechets
+// Initialise les animations
+function initAnimations() {
+    this.anims.create({
+        key: 'ramer',
+        frames: this.anims.generateFrameNumbers('player', { frames: [0, 1] }),
+        frameRate: 8,
+        repeat: -1
+    });
+    this.anims.create({
+        key: 'courant',
+        frames: this.anims.generateFrameNumbers('courant', { frames: [0, 1, 2, 3, 4, 6, 7, 8, 9] }),
+        frameRate: 10,
+        repeat: -1
+    });
+}
+
+// Initialise les déchets
+function initDechets() {
     dechetGroup = this.physics.add.group();
+    spawndechets.call(this, 10);
+}
 
-    spawndechets.call(this, 50);
-    //création deux dechets tout les 5 secondes
+// Initialise les courant
+function initCourant(scene) {
+    courantGroup = scene.physics.add.group();
+    spawncourants.call(scene, 30);
+}
+
+// Configure les événements
+function setupEvents() {
     this.time.addEvent({
         delay: 5000,
         loop: true,
@@ -122,7 +144,6 @@ function create() {
         args: [2]
     });
 
-    // Déplace les dechets toutes les 100ms
     this.time.addEvent({
         delay: 100,
         loop: true,
@@ -131,126 +152,270 @@ function create() {
     });
 }
 
-// Fonction de mise à jour à chaque frame
-function update() {
-    movePlayer.call(this); // Déplace le joueur
-    handleMouseRotation.call(this); // Gérer la rotation du joueur
-    handleColliderMovement.call(this); // Gérer la position du collider
+// Ajuste la vitesse du joueur en fonction du nombre de déchets
+function updateSpeed() {
+    const dechetCount = dechetGroup.getChildren().length;
+    currentSpeed = baseSpeed * Math.max(1 - dechetCount * 0.01, 0.2); // Réduit la vitesse, minimum 20%
+    speedDiag = currentSpeed * (Math.sqrt(2) / 2);
 }
 
-// Déplacement du joueur
+// Déplace le joueur en fonction des touches
 function movePlayer() {
-    // Réinitialisation de la vitesse
-    player.setVelocityX(0);
-    player.setVelocityY(0);
+    player.setVelocity(0, 0);
 
-    // Déplacement haut/bas/gauche/droite
-    if (cursors.up.isDown || this.input.keyboard.addKey(haut).isDown) {
-        player.setVelocity(0, -speed);
-        // marche = true;
+    const keys = this.input.keyboard;
+
+    if (keys.addKey(haut).isDown) {
+        player.setVelocityY(-currentSpeed);
+        player.setRotation(Phaser.Math.DegToRad(270));
+        rame = true;
     }
-    if (cursors.down.isDown || this.input.keyboard.addKey(bas).isDown) {
-        player.setVelocity(0, speed);
-        // marche = true;
+    if (keys.addKey(bas).isDown) {
+        player.setVelocityY(currentSpeed);
+        player.setRotation(Phaser.Math.DegToRad(90));
+        rame = true;
     }
-    if (cursors.right.isDown || this.input.keyboard.addKey(droite).isDown) {
-        player.setVelocity(speed, 0);
-        // marche = true;
+    if (keys.addKey(droite).isDown) {
+        player.setVelocityX(currentSpeed);
+        player.setRotation(Phaser.Math.DegToRad(0));
+        rame = true;
     }
-    if (cursors.left.isDown || this.input.keyboard.addKey(gauche).isDown) {
-        player.setVelocity(-speed, 0);
-        // marche = true;
+    if (keys.addKey(gauche).isDown) {
+        player.setVelocityX(-currentSpeed);
+        player.setRotation(Phaser.Math.DegToRad(180));
+        rame = true;
     }
 
-    // Déplacement diagonal
-    if ((cursors.up.isDown && cursors.left.isDown) || (this.input.keyboard.addKey(gauche).isDown && this.input.keyboard.addKey(haut).isDown)) {
-        player.setVelocity(-speed_diag, -speed_diag);
+    handleDiagonalMovement(keys);
+}
+
+// Gère le déplacement diagonal
+function handleDiagonalMovement(keys) {
+    if (keys.addKey(gauche).isDown && keys.addKey(haut).isDown) {
+        player.setVelocity(-speedDiag, -speedDiag);
+        player.setRotation(Phaser.Math.DegToRad(225));
     }
-    if ((cursors.up.isDown && cursors.right.isDown) || (this.input.keyboard.addKey(droite).isDown && this.input.keyboard.addKey(haut).isDown)) {
-        player.setVelocity(speed_diag, -speed_diag);
+    if (keys.addKey(droite).isDown && keys.addKey(haut).isDown) {
+        player.setVelocity(speedDiag, -speedDiag);
+        player.setRotation(Phaser.Math.DegToRad(315));
     }
-    if ((cursors.down.isDown && cursors.left.isDown) || (this.input.keyboard.addKey(gauche).isDown && this.input.keyboard.addKey(bas).isDown)) {
-        player.setVelocity(-speed_diag, speed_diag);
+    if (keys.addKey(gauche).isDown && keys.addKey(bas).isDown) {
+        player.setVelocity(-speedDiag, speedDiag);
+        player.setRotation(Phaser.Math.DegToRad(135));
     }
-    if ((cursors.down.isDown && cursors.right.isDown) || (this.input.keyboard.addKey(droite).isDown && this.input.keyboard.addKey(bas).isDown)) {
-        player.setVelocity(speed_diag, speed_diag);
+    if (keys.addKey(droite).isDown && keys.addKey(bas).isDown) {
+        player.setVelocity(speedDiag, speedDiag);
+        player.setRotation(Phaser.Math.DegToRad(45));
     }
 }
 
-// Rotation du joueur en fonction de la souris
-function handleMouseRotation() {
-    const angle = Phaser.Math.Angle.Between(player.x, player.y, this.input.mousePointer.x + this.cameras.main.scrollX, this.input.mousePointer.y + this.cameras.main.scrollY);
-    player.setRotation(angle);
+let progressBar;
+let progress = 0;
+let currentCourant = null;
+
+// Gère les collisions
+function handleCollisions() {
+    this.physics.overlap(player, dechetGroup, (player, dechet) => {
+        if (!currentCourant) {
+            showDechetInteractionBar.call(this, dechet); // Affiche une barre d'interaction
+        }
+    });
+
+    this.physics.overlap(player, courantGroup, (player, courant) => {
+        if (!currentCourant) {
+            currentCourant = courant;
+            showProgressBar.call(this);
+            this.input.keyboard.on('keydown-SPACE', handleSpacePress, this);
+        }
+    });
 }
 
-// Mise à jour de la position du collider devant le joueur
-function handleColliderMovement() {
-    const angle = player.rotation; // Récupérer l'angle calculé dans handleMouseRotation
-    const offsetX = Math.cos(angle) * 50; // Ajuster la largeur du collider
-    const offsetY = Math.sin(angle) * 50; // Ajuster la hauteur du collider
-    playerCollider.setPosition(player.x + offsetX, player.y + offsetY);
+// Affiche la barre de progression
+function showProgressBar() {
+    progressBar = this.add.graphics();
+    updateProgressBar.call(this);
 }
 
-// Fonction pour faire spawn des dechets aléatoires
+// Met à jour la barre de progression
+function updateProgressBar() {
+    const barWidth = 200; // Largeur de la barre de progression
+    const barHeight = 20; // Hauteur de la barre de progression
+    const x = player.x - barWidth / 2;
+    const y = player.y - 100;
+
+    progressBar.clear();
+    progressBar.fillStyle(0x808080, 1); // Couleur grise pour la barre de progression
+    progressBar.fillRect(x, y, barWidth, barHeight); // Dessine la barre de progression grise
+    progressBar.fillStyle(0x00ff00, 1); // Couleur verte pour la progression
+    progressBar.fillRect(x, y, (progress / 100) * barWidth, barHeight); // Remplit la barre de progression
+}
+
+// Gère les pressions sur la touche espace
+function handleSpacePress() {
+    if (currentCourant) {
+        progress += 10; // Ajustez la valeur selon vos besoins
+        updateProgressBar.call(this);
+
+        if (progress >= 100) {
+            currentCourant.destroy();
+            progressBar.destroy();
+            progress = 0;
+            currentCourant = null;
+            this.input.keyboard.off('keydown-SPACE', handleSpacePress, this);
+        }
+    }
+}
+
+let interactionBar, interactionZoneGreen, interactionZoneRed, movingBar;
+let movingBarDirection = 1;
+let interactionBarTimer;
+let isInteracting = false;
+
+// Affiche une barre d'interaction lorsqu'un déchet est détecté
+function showDechetInteractionBar(dechet) {
+    if (isInteracting) return;
+
+    isInteracting = true;
+
+    const barWidth = 200;
+    const barHeight = 20;
+    const greenZoneWidth = 50; // Largeur de la zone verte
+    const redZoneWidth = barWidth - greenZoneWidth; // Largeur de la zone rouge
+    const x = player.x - barWidth / 2;
+    const y = player.y - 100;
+
+    interactionBar = this.add.graphics();
+    interactionBar.fillStyle(0x000000, 1); // Couleur noire pour le cadre
+    interactionBar.fillRect(x - 2, y - 2, barWidth + 4, barHeight + 4); // Cadre noir
+
+    // Zone verte
+    interactionZoneGreen = this.add.graphics();
+    interactionZoneGreen.fillStyle(0x00ff00, 1);
+    interactionZoneGreen.fillRect(x, y, greenZoneWidth, barHeight);
+
+    // Zone rouge
+    interactionZoneRed = this.add.graphics();
+    interactionZoneRed.fillStyle(0xff0000, 1);
+    interactionZoneRed.fillRect(x + greenZoneWidth, y, redZoneWidth, barHeight);
+
+    // Barre noire mobile
+    movingBar = this.add.graphics();
+    movingBar.fillStyle(0x000000, 1);
+    let movingBarX = x; // Position initiale de la barre noire
+    movingBar.fillRect(movingBarX, y, 10, barHeight);
+
+    // Animation de la barre noire
+    interactionBarTimer = this.time.addEvent({
+        delay: 16, // 60 FPS
+        loop: true,
+        callback: () => {
+            movingBarX += movingBarDirection * 4; // Vitesse de déplacement
+            if (movingBarX <= x || movingBarX >= x + barWidth - 10) {
+                movingBarDirection *= -1; // Inverse la direction
+            }
+            movingBar.clear();
+            movingBar.fillRect(movingBarX, y, 10, barHeight);
+        }
+    });
+
+    // Gestion de la touche espace
+    this.input.keyboard.once('keydown-SPACE', () => {
+        checkBarPosition.call(this, movingBarX, x, greenZoneWidth, dechet);
+    });
+}
+
+// Vérifie si la barre noire est dans la zone verte
+function checkBarPosition(movingBarX, barStartX, greenZoneWidth, dechet) {
+    const greenStart = barStartX;
+    const greenEnd = barStartX + greenZoneWidth;
+
+    if (movingBarX >= greenStart && movingBarX <= greenEnd) {
+        // La barre noire est dans la zone verte
+        dechet.destroy(); // Supprime le déchet
+    }
+
+    // Supprime les graphiques de la barre
+    interactionBar.destroy();
+    interactionZoneGreen.destroy();
+    interactionZoneRed.destroy();
+    movingBar.destroy();
+
+    interactionBarTimer.remove(false); // Arrête le timer
+    isInteracting = false;
+}
+
+// Joue les animations du joueur
+function playAnimations() {
+    if (rame) {
+        player.anims.play('ramer', true);
+        rame = false;
+    } else {
+        player.anims.stop();
+    }
+
+    courantGroup.getChildren().forEach(courant => {
+        courant.anims.play('courant', true);
+    });
+}
+
+// Ajoute des déchets sur la carte
 function spawndechets(numberOfdechets) {
     for (let i = 0; i < numberOfdechets; i++) {
-        let { x, y } = generateRandomPosition(allEntities, border_width, border_height); // Trouver une position aléatoire
-
-        // Créer le dechet à la position générée
+        let { x, y } = generateRandomPosition(allEntities, border_width, border_height);
         let dechet = dechetGroup.create(x, y, 'dechet');
-        dechet.setScale(0.5); // Ajuster la taille du dechet
-        dechet.setCollideWorldBounds(true); // Empêcher le dechet de sortir des limites du monde
-        dechet.setDepth(0); // Placer le dechet sous le joueur (peut être ajusté si nécessaire)
-
-        // Ajouter le dechet à la liste des entités
+        dechet.setScale(0.5);
+        dechet.setCircle(50, dechet.width / 2 - 50, dechet.height / 2 - 50);
+        dechet.setDepth(0);
         allEntities.push(dechet);
     }
 }
 
-// Fonction pour générer une position aléatoire sans collision avec d'autres entités
-function generateRandomPosition(existingEntities, borderWidth, borderHeight) {
-    let isColliding = true;
-    let x, y;
+// Ajoute des courants sur la carte
+function spawncourants(numberOfdechets) {
+    for (let i = 0; i < numberOfdechets; i++) {
+        let { x, y } = generateRandomPosition(allEntities, border_width, border_height);
+        let courant = courantGroup.create(x, y, 'courant');
+        courant.setScale(0.8);
+        courant.body.setSize(courant.width, courant.height * 0.6);
+        courant.setDepth(0);
+        allEntities.push(courant);
+    }
+}
 
-    while (isColliding) {
-        isColliding = false;
+// Génère une position aléatoire
+function generateRandomPosition(existingEntities, borderWidth, borderHeight) {
+    let x, y;
+    let isColliding;
+
+    do {
         x = Phaser.Math.Between(0, borderWidth);
         y = Phaser.Math.Between(0, borderHeight);
-
-        for (const entity of existingEntities) {
-            const distance = Phaser.Math.Distance.Between(x, y, entity.x, entity.y);
-            if (distance < entity.displayWidth) {
-                isColliding = true;
-                break;
-            }
-        }
-    }
+        isColliding = existingEntities.some(entity => Phaser.Math.Distance.Between(x, y, entity.x, entity.y) < entity.displayWidth);
+    } while (isColliding);
 
     return { x, y };
 }
 
-// Fonction pour mettre à jour la position des dechets
+// Déplace les déchets
 function movedechets() {
     dechetGroup.getChildren().forEach(dechet => {
-        // Déplacer chaque dechet dans une direction aléatoire
-        let direction = Phaser.Math.Between(0, 3); // 0 = haut, 1 = bas, 2 = gauche, 3 = droite
-        let speed = 120; // Vitesse du mouvement
+        const direction = Phaser.Math.Between(0, 3);
+        const speed = 60;
 
         switch (direction) {
-            case 0: // Haut
+            case 0:
                 dechet.setVelocityY(-speed);
                 break;
-            case 1: // Bas
+            case 1:
                 dechet.setVelocityY(speed);
                 break;
-            case 2: // Gauche
+            case 2:
                 dechet.setVelocityX(-speed);
                 break;
-            case 3: // Droite
+            case 3:
                 dechet.setVelocityX(speed);
                 break;
         }
     });
 }
-
 </script>

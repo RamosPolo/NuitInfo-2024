@@ -3,7 +3,7 @@
   <div class="bg-gray-100 flex flex-col items-center justify-center min-h-screen text-center">
     <div class="container mx-auto p-6">
 
-      <h1 class="text-3xl font-semibold mb-8 underline">Bienvenue dans <strong> JEU DE L'EAU !</strong></h1>
+      <h1 class="text-3xl font-semibold mb-8 underline ">Bienvenue dans <strong> JEU DE L'EAU !</strong></h1>
       <h3 class="text-2xl font-semibold mb-8">Choisissez votre Pokémon !</h3>
 
       <div class="mb-12">
@@ -24,10 +24,11 @@
           @mouseenter="hoverImage(img.img)" @mouseleave="unhoverImage(img.img)" @click="selectImage(img.img)">
           <img :src="flippedCards[img.img] || hoveredCards[img.img] ? `./img/${img.qr}` : `./img/${img.img}`"
             class="w-80 mx-auto h-80 object-contain rounded-lg">
+          <p v-if="hoveredCards[img.img]">SCANNEZ MOI !!!</p>
 
           <div v-if="hoveredCards[img.img]"
             class="flex flex-col items-center justify-center bg-white/100 rounded-b-lg border-t my-12 ">
-            <h3 class="text-lg font-bold mb-2 mt-6  text-2xl">Modificateurs</h3>
+            <h3 class=" font-bold mb-2 mt-6 text-3xl">Modificateurs</h3>
             <table class="text-sm text-gray-700 w-72">
               <thead>
                 <tr class="border-b space-x-4 w-full text-2xl">
@@ -38,9 +39,9 @@
               </thead>
               <tbody>
                 <tr class="text-xl">
-                  <td class="px-2 p-4">{{ img.vitesse }}%</td>
-                  <td class="px-2 p-4">{{ img.force }}%</td>
-                  <td class="px-2 p-4">{{ img.vie }}%</td>
+                  <td class="p-4 w-1/3 text-center">{{ img.vitesse }}%</td>
+                  <td class="p-4 w-1/3 text-center">{{ img.force }}%</td>
+                  <td class="p-4 w-1/3 text-center">{{ img.vie }}%</td>
                 </tr>
               </tbody>
             </table>
@@ -53,6 +54,9 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
+import { defineEmits } from 'vue';
+
+const emit = defineEmits();
 
 // Define the reactive data
 const nameImg = ref([]);
@@ -142,6 +146,8 @@ const selectImage = (img) => {
     name: selectedImage.value,
     stats: selectedStats.value
   }));
+
+  emit('popModal');
 };
 
 // Watch for changes in selected type to reset hover and flip states
