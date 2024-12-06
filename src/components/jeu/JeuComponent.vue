@@ -58,7 +58,7 @@ let border_width;
 let allEntities = []; // liste des pos de chaque entité
 
 
-// let marche = false;
+let rame = false;
 
 
 let dechetGroup;
@@ -70,9 +70,9 @@ let cursors;
 
 function preload() {
     this.load.image('map', 'images/map.png');
-    this.load.image('dechet', 'images/rocher/rocher.png');
+    this.load.image('dechet', 'images/element/dechet3.png');
 
-    this.load.spritesheet('player', 'images/player/player_annimation.png', { frameWidth: 270, frameHeight: 270 });
+    this.load.spritesheet('player', 'images/player/bateau.png', { frameWidth: 200, frameHeight: 200 });
 }
 
 function create() {
@@ -85,7 +85,7 @@ function create() {
 
     // Création du joueur
     player = this.physics.add.sprite(100, 100, 'player');
-    player.setScale(0.43);
+    player.setScale(0.7);
     player.setCollideWorldBounds(true);
     player.setCircle(80, player.width / 2 - 80, player.height / 2 - 80);
     player.setDepth(1);
@@ -147,19 +147,19 @@ function movePlayer() {
     // Déplacement haut/bas/gauche/droite
     if (cursors.up.isDown || this.input.keyboard.addKey(haut).isDown) {
         player.setVelocity(0, -speed);
-        // marche = true;
+        rame = true;
     }
     if (cursors.down.isDown || this.input.keyboard.addKey(bas).isDown) {
         player.setVelocity(0, speed);
-        // marche = true;
+        rame = true;
     }
     if (cursors.right.isDown || this.input.keyboard.addKey(droite).isDown) {
         player.setVelocity(speed, 0);
-        // marche = true;
+        rame = true;
     }
     if (cursors.left.isDown || this.input.keyboard.addKey(gauche).isDown) {
         player.setVelocity(-speed, 0);
-        // marche = true;
+        rame = true;
     }
 
     // Déplacement diagonal
