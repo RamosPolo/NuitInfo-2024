@@ -1,19 +1,21 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
+import { computed } from 'vue'
+// Obtenir la route active
+const route = useRoute();
+
+// verif si route == /
+const isHome = computed(() => route.path === '/');
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <header v-if="isHome">
 
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
+      <h1>Home</h1>
       <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>ù
-        <RouterLink to="/jeu">Jeu</RouterLink>
+        <RouterLink to="/jeu">Accéder au jeu</RouterLink>
       </nav>
     </div>
   </header>
