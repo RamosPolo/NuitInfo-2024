@@ -64,7 +64,6 @@ let rame = false;
 let dechetGroup;
 
 
-let playerCollider;
 let cursors;
     
 
@@ -89,11 +88,6 @@ function create() {
     player.setCollideWorldBounds(true);
     player.setCircle(80, player.width / 2 - 80, player.height / 2 - 80);
     player.setDepth(1);
-
-    // Création du collider invisible devant le joueur (main)
-    playerCollider = this.physics.add.image(player.x, player.y, null);
-    playerCollider.setDisplaySize(50, 50); // Taille du collider
-    playerCollider.visible = false; // Rendre le collider invisible
 
     // Création des bordures de la carte
     this.physics.world.setBounds(0, 0, border_width, border_height);
@@ -129,13 +123,33 @@ function create() {
         callback: movedechets,
         callbackScope: this
     });
+
+    // Creation des annimations
+    this.anims.create({
+      key: 'ramer',
+      frames: this.anims.generateFrameNumbers('player', { frames: [0, 1, 2, 3, 4,6,7,] }),
+      frameRate: 8,
+      repeat: -1
+    });
+
 }
 
 // Fonction de mise à jour à chaque frame
 function update() {
     movePlayer.call(this); // Déplace le joueur
-    handleMouseRotation.call(this); // Gérer la rotation du joueur
-    handleColliderMovement.call(this); // Gérer la position du collider
+
+    // Gérer les collisions entre le joueur et les dechets
+    this.physics.overlap(player, dechetGroup, (player, dechet) => {
+        dechet.destroy(); // Supprimer le dechet
+    });
+
+    // animation du joueur
+    if(rame){
+        player.anims.play('ramer', true)
+        rame = false
+    }else{
+        player.anims.play('ramer', false)
+    }
 }
 
 // Déplacement du joueur
@@ -147,49 +161,45 @@ function movePlayer() {
     // Déplacement haut/bas/gauche/droite
     if (cursors.up.isDown || this.input.keyboard.addKey(haut).isDown) {
         player.setVelocity(0, -speed);
+        player.setRotation(-90);
         rame = true;
     }
     if (cursors.down.isDown || this.input.keyboard.addKey(bas).isDown) {
         player.setVelocity(0, speed);
+        player.setRotation(90);
         rame = true;
     }
     if (cursors.right.isDown || this.input.keyboard.addKey(droite).isDown) {
         player.setVelocity(speed, 0);
+        player.setRotation(0);
         rame = true;
     }
     if (cursors.left.isDown || this.input.keyboard.addKey(gauche).isDown) {
         player.setVelocity(-speed, 0);
+        player.setRotation(180);
         rame = true;
     }
 
     // Déplacement diagonal
     if ((cursors.up.isDown && cursors.left.isDown) || (this.input.keyboard.addKey(gauche).isDown && this.input.keyboard.addKey(haut).isDown)) {
         player.setVelocity(-speed_diag, -speed_diag);
+        player.setRotation(-135);
     }
     if ((cursors.up.isDown && cursors.right.isDown) || (this.input.keyboard.addKey(droite).isDown && this.input.keyboard.addKey(haut).isDown)) {
         player.setVelocity(speed_diag, -speed_diag);
+        player.setRotation(-45);
     }
     if ((cursors.down.isDown && cursors.left.isDown) || (this.input.keyboard.addKey(gauche).isDown && this.input.keyboard.addKey(bas).isDown)) {
         player.setVelocity(-speed_diag, speed_diag);
+        player.setRotation(135);
     }
     if ((cursors.down.isDown && cursors.right.isDown) || (this.input.keyboard.addKey(droite).isDown && this.input.keyboard.addKey(bas).isDown)) {
         player.setVelocity(speed_diag, speed_diag);
+        player.setRotation(45);
     }
 }
 
-// Rotation du joueur en fonction de la souris
-function handleMouseRotation() {
-    const angle = Phaser.Math.Angle.Between(player.x, player.y, this.input.mousePointer.x + this.cameras.main.scrollX, this.input.mousePointer.y + this.cameras.main.scrollY);
-    player.setRotation(angle);
-}
 
-// Mise à jour de la position du collider devant le joueur
-function handleColliderMovement() {
-    const angle = player.rotation; // Récupérer l'angle calculé dans handleMouseRotation
-    const offsetX = Math.cos(angle) * 50; // Ajuster la largeur du collider
-    const offsetY = Math.sin(angle) * 50; // Ajuster la hauteur du collider
-    playerCollider.setPosition(player.x + offsetX, player.y + offsetY);
-}
 
 // Fonction pour faire spawn des dechets aléatoires
 function spawndechets(numberOfdechets) {
