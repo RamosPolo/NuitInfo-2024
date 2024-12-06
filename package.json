@@ -2,7 +2,7 @@
   "name": "nuitinfo-2024",
   "version": "0.0.0",
   "private": true,
-  "proxy": "http://127.0.0.1:3000",
+  "proxy": "http://localhost:3000",
   "type": "module",
   "scripts": {
     "dev": "vite",
